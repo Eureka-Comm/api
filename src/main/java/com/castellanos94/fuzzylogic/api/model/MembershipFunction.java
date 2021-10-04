@@ -23,9 +23,6 @@ public abstract class MembershipFunction {
         this.type = type;
     }
 
-    public MembershipFunctionType getType() {
-        return type;
-    }
 
     public abstract com.castellanos94.fuzzylogicgp.membershipfunction.MembershipFunction toInternalObject();
 }
