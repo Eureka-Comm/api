@@ -8,7 +8,8 @@ import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 public class Generator extends Base {
-    public enum Operators{AND,OR,NOT,IMP,EQV}
+    public enum Operators {AND, OR, NOT, IMP, EQV}
+
     @NotNull
     @NotEmpty
     protected Set<Operators> operators;

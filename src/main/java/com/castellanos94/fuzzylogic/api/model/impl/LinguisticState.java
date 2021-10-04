@@ -41,7 +41,7 @@ public class LinguisticState extends Base {
 
     @Override
     public int hashCode() {
-        return Objects.hash(label,cname, f);
+        return Objects.hash(label, cname, f);
     }
 
     @Override
