@@ -1,4 +1,4 @@
-package com.castellanos94.fuzzylogic.api;
+package com.castellanos94.fuzzylogic.api.model;
 
 import javax.validation.constraints.NotNull;
 

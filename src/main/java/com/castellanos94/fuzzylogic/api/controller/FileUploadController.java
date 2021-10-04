@@ -1,5 +1,6 @@
-package com.castellanos94.fuzzylogic.api;
+package com.castellanos94.fuzzylogic.api.controller;
 
+import com.castellanos94.fuzzylogic.api.model.User;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestPart;

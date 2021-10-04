@@ -2,9 +2,9 @@ package com.castellanos94.fuzzylogic.api.model;
 
 public class ResponseModel {
     public enum Status{Done,Running, Failed,Created}
-    private String msg;
+    private String msg ="";
     private Status status;
-    private String id;
+    private String id="";
 
     public String getMsg() {
         return msg;

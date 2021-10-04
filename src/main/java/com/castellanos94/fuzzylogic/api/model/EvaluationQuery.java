@@ -1,11 +1,12 @@
 package com.castellanos94.fuzzylogic.api.model;
 
+import com.castellanos94.fuzzylogic.api.model.impl.LinguisticState;
 import com.castellanos94.fuzzylogicgp.logic.LogicType;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
+import java.util.Set;
 
 public class EvaluationQuery {
     @NotBlank
@@ -14,7 +15,7 @@ public class EvaluationQuery {
     @NotBlank
     protected String dataset;
     @NotEmpty
-    protected ArrayList<LinguisticState> states;
+    protected Set<LinguisticState> states;
     @NotNull
     protected LogicType logicType;
     @NotBlank
@@ -44,11 +45,11 @@ public class EvaluationQuery {
         this.dataset = dataset;
     }
 
-    public ArrayList<LinguisticState> getStates() {
+    public Set<LinguisticState> getStates() {
         return states;
     }
 
-    public void setStates(ArrayList<LinguisticState> states) {
+    public void setStates(Set<LinguisticState> states) {
         this.states = states;
     }
 
