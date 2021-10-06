@@ -1,14 +1,12 @@
 package com.castellanos94.fuzzylogic.api.controller;
 
 import com.castellanos94.fuzzylogic.api.db.QueryRepository;
-import com.castellanos94.fuzzylogic.api.model.Query;
+import com.castellanos94.fuzzylogic.api.model.ResponseModel;
 import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
 import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
-import com.castellanos94.fuzzylogic.api.model.ResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,23 +21,14 @@ import java.util.List;
 public class QueryController {
     @Autowired
     QueryRepository queryRepository;
-    @RequestMapping(value = "public/evaluation", method = RequestMethod.GET, produces = {"application/json"})
-    public ResponseEntity<List<EvaluationQuery>> getAllPublicEvaluations() {
-        List<EvaluationQuery> queries = new ArrayList<>();
-        queryRepository.findAll().stream().filter(q -> q instanceof EvaluationQuery && q.isPublic()).map(q -> ((EvaluationQuery) q)).forEachOrdered(queries::add);
-        if (queries.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return ResponseEntity.ok(queries);
-    }
-    @RequestMapping(value = "public/discovery", method = RequestMethod.GET, produces = {"application/json"})
-    public ResponseEntity<List<DiscoveryQuery>> getAll() {
-        List<DiscoveryQuery> queries = new ArrayList<>();
-        queryRepository.findAll().stream().filter(q -> q instanceof DiscoveryQuery && q.isPublic()).map(q -> ((DiscoveryQuery) q)).forEachOrdered(queries::add);
-        if (queries.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return ResponseEntity.ok(queries);
+    @Autowired
+    AsynchronousService service;
+
+
+    @RequestMapping(value = "run", method = RequestMethod.POST, produces = {"application/json"})
+    public ResponseEntity<ResponseModel> callRunner() {
+        service.executeAsynchronously();
+        return ResponseEntity.ok(new ResponseModel().setStatus(ResponseModel.Status.Running));
     }
 
     @RequestMapping(value = "evaluation", method = RequestMethod.GET, produces = {"application/json"})
@@ -52,7 +41,7 @@ public class QueryController {
         return ResponseEntity.ok(queries);
     }
 
-    @RequestMapping(value = "/evaluation", method = RequestMethod.POST, consumes = {"application/json"}, produces = {"application/json"})
+    @RequestMapping(value = "evaluation", method = RequestMethod.POST, consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<ResponseModel> upload(@RequestBody @Valid EvaluationQuery evaluationQuery) {
         StringBuilder msgBuilder = new StringBuilder();
         evaluationQuery.getStates().stream().filter(s -> s.getF() == null).forEachOrdered(linguisticState -> msgBuilder.append(linguisticState.getLabel()).append(", "));
@@ -69,12 +58,10 @@ public class QueryController {
             evaluationQuery.setId(null);
         }
         EvaluationQuery save = queryRepository.save(evaluationQuery);
-        responseModel.setStatus(ResponseModel.Status.Created);
-        responseModel.setId(save.getId());
-        return ResponseEntity.ok(responseModel);
+        return ResponseEntity.ok(responseModel.setStatus(ResponseModel.Status.Created).setId(save.getId()));
     }
 
-    @RequestMapping(value = "/discovery", method = RequestMethod.POST, consumes = {"application/json"}, produces = {"application/json"})
+    @RequestMapping(value = "discovery", method = RequestMethod.POST, consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<ResponseModel> uploadDiscovery(@RequestBody @Valid DiscoveryQuery discoveryQuery) {
         ResponseModel responseModel = new ResponseModel();
 
@@ -99,9 +86,8 @@ public class QueryController {
             discoveryQuery.setId(null);
         }
         DiscoveryQuery save = queryRepository.save(discoveryQuery);
-        responseModel.setStatus(ResponseModel.Status.Created);
-        responseModel.setId(save.getId());
-        return ResponseEntity.ok(responseModel);
+
+        return ResponseEntity.ok(responseModel.setStatus(ResponseModel.Status.Created).setId(save.getId()));
     }
 
     @RequestMapping(value = "discovery", method = RequestMethod.GET, produces = {"application/json"})
@@ -114,7 +100,8 @@ public class QueryController {
         return ResponseEntity.ok(queries);
     }
 
-    @RequestMapping(value = "/dataset", method = RequestMethod.POST, consumes = {"multipart/form-data"}, produces = {"application/json"})
+
+    @RequestMapping(value = "dataset", method = RequestMethod.POST, consumes = {"multipart/form-data"}, produces = {"application/json"})
     public ResponseEntity<ResponseModel> uploadFile(@RequestParam("file") @Valid @NotNull @NotBlank MultipartFile file) {
         ResponseModel responseModel = new ResponseModel();
 

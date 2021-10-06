@@ -11,24 +11,27 @@ public class ResponseModel {
         return msg;
     }
 
-    public void setMsg(String msg) {
+    public ResponseModel setMsg(String msg) {
         this.msg = msg;
+        return this;
     }
 
     public Status getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public ResponseModel setStatus(Status status) {
         this.status = status;
+        return this;
     }
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public ResponseModel setId(String id) {
         this.id = id;
+        return this;
     }
 
     @Override
