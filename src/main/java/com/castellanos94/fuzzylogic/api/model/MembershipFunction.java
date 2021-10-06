@@ -17,12 +17,15 @@ import javax.validation.constraints.NotNull;
 })
 public abstract class MembershipFunction {
     @NotNull
-    protected final MembershipFunctionType type;
+    protected MembershipFunctionType type;
 
     protected MembershipFunction(MembershipFunctionType type) {
         this.type = type;
     }
 
+    public void setType(MembershipFunctionType type) {
+        this.type = type;
+    }
 
     public abstract com.castellanos94.fuzzylogicgp.membershipfunction.MembershipFunction toInternalObject();
 }

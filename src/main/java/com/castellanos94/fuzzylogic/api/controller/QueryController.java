@@ -1,25 +1,59 @@
 package com.castellanos94.fuzzylogic.api.controller;
 
-import com.castellanos94.fuzzylogic.api.model.DiscoveryQuery;
-import com.castellanos94.fuzzylogic.api.model.EvaluationQuery;
+import com.castellanos94.fuzzylogic.api.db.QueryRepository;
+import com.castellanos94.fuzzylogic.api.model.Query;
+import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
+import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
 import com.castellanos94.fuzzylogic.api.model.ResponseModel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:8081")
 @RestController
 public class QueryController {
-    @RequestMapping(value = "/evaluation", method = RequestMethod.POST, consumes = {"multipart/form-data"})
-    public ResponseEntity<ResponseModel> upload(@RequestPart("query") @Valid EvaluationQuery evaluationQuery,
-                                                @RequestPart("dataset") @Valid @NotNull @NotBlank MultipartFile file) {
+    @Autowired
+    QueryRepository queryRepository;
+    @RequestMapping(value = "public/evaluation", method = RequestMethod.GET, produces = {"application/json"})
+    public ResponseEntity<List<EvaluationQuery>> getAllPublicEvaluations() {
+        List<EvaluationQuery> queries = new ArrayList<>();
+        queryRepository.findAll().stream().filter(q -> q instanceof EvaluationQuery && q.isPublic()).map(q -> ((EvaluationQuery) q)).forEachOrdered(queries::add);
+        if (queries.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return ResponseEntity.ok(queries);
+    }
+    @RequestMapping(value = "public/discovery", method = RequestMethod.GET, produces = {"application/json"})
+    public ResponseEntity<List<DiscoveryQuery>> getAll() {
+        List<DiscoveryQuery> queries = new ArrayList<>();
+        queryRepository.findAll().stream().filter(q -> q instanceof DiscoveryQuery && q.isPublic()).map(q -> ((DiscoveryQuery) q)).forEachOrdered(queries::add);
+        if (queries.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return ResponseEntity.ok(queries);
+    }
+
+    @RequestMapping(value = "evaluation", method = RequestMethod.GET, produces = {"application/json"})
+    public ResponseEntity<List<EvaluationQuery>> getEvaluations() {
+        List<EvaluationQuery> queries = new ArrayList<>();
+        queryRepository.findAll().stream().filter(q -> q instanceof EvaluationQuery).map(q -> ((EvaluationQuery) q)).forEachOrdered(queries::add);
+        if (queries.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return ResponseEntity.ok(queries);
+    }
+
+    @RequestMapping(value = "/evaluation", method = RequestMethod.POST, consumes = {"application/json"}, produces = {"application/json"})
+    public ResponseEntity<ResponseModel> upload(@RequestBody @Valid EvaluationQuery evaluationQuery) {
         StringBuilder msgBuilder = new StringBuilder();
         evaluationQuery.getStates().stream().filter(s -> s.getF() == null).forEachOrdered(linguisticState -> msgBuilder.append(linguisticState.getLabel()).append(", "));
         ResponseModel responseModel = new ResponseModel();
@@ -30,28 +64,20 @@ public class QueryController {
             responseModel.setMsg("The following linguistic states have no membership function: " + msg);
             return ResponseEntity.badRequest().body(responseModel);
         }
-        if (!Utils.isCSVFile(file)) {
-            responseModel.setStatus(ResponseModel.Status.Failed);
-            responseModel.setMsg("Only CSV files are supported");
-            return ResponseEntity.badRequest().body(responseModel);
+        System.out.println("Save in repository...");
+        if (evaluationQuery.getId() != null) {
+            evaluationQuery.setId(null);
         }
-        System.out.println(evaluationQuery);
-        FileUploadController.printFileDetails(file);
+        EvaluationQuery save = queryRepository.save(evaluationQuery);
         responseModel.setStatus(ResponseModel.Status.Created);
-        responseModel.setId("1213214A");
+        responseModel.setId(save.getId());
         return ResponseEntity.ok(responseModel);
     }
 
-    @RequestMapping(value = "/discovery", method = RequestMethod.POST, consumes = {"multipart/form-data"})
-    @Validated
-    public ResponseEntity<ResponseModel> upload(@RequestPart("query") @Valid DiscoveryQuery discoveryQuery,
-                                                @RequestPart("dataset") @Valid @NotNull @NotBlank MultipartFile file) {
+    @RequestMapping(value = "/discovery", method = RequestMethod.POST, consumes = {"application/json"}, produces = {"application/json"})
+    public ResponseEntity<ResponseModel> uploadDiscovery(@RequestBody @Valid DiscoveryQuery discoveryQuery) {
         ResponseModel responseModel = new ResponseModel();
-        if (!Utils.isCSVFile(file)) {
-            responseModel.setStatus(ResponseModel.Status.Failed);
-            responseModel.setMsg("Only CSV files are supported");
-            return ResponseEntity.badRequest().body(responseModel);
-        }
+
         if (discoveryQuery.getGenerators() != null) {
             StringBuilder msgBuilder = new StringBuilder();
             discoveryQuery.getGenerators().forEach(g -> {
@@ -67,10 +93,40 @@ public class QueryController {
                 return ResponseEntity.badRequest().body(responseModel);
             }
         }
-        System.out.println(discoveryQuery);
+
+        System.out.println("Save in repository...");
+        if (discoveryQuery.getId() != null) {
+            discoveryQuery.setId(null);
+        }
+        DiscoveryQuery save = queryRepository.save(discoveryQuery);
+        responseModel.setStatus(ResponseModel.Status.Created);
+        responseModel.setId(save.getId());
+        return ResponseEntity.ok(responseModel);
+    }
+
+    @RequestMapping(value = "discovery", method = RequestMethod.GET, produces = {"application/json"})
+    public ResponseEntity<List<DiscoveryQuery>> getDiscoveries() {
+        List<DiscoveryQuery> queries = new ArrayList<>();
+        queryRepository.findAll().stream().filter(q -> q instanceof DiscoveryQuery).map(q -> ((DiscoveryQuery) q)).forEachOrdered(queries::add);
+        if (queries.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return ResponseEntity.ok(queries);
+    }
+
+    @RequestMapping(value = "/dataset", method = RequestMethod.POST, consumes = {"multipart/form-data"}, produces = {"application/json"})
+    public ResponseEntity<ResponseModel> uploadFile(@RequestParam("file") @Valid @NotNull @NotBlank MultipartFile file) {
+        ResponseModel responseModel = new ResponseModel();
+
+        if (!Utils.isCSVFile(file)) {
+            responseModel.setStatus(ResponseModel.Status.Failed);
+            responseModel.setMsg("Only CSV files are supported");
+            return ResponseEntity.badRequest().body(responseModel);
+        }
         FileUploadController.printFileDetails(file);
         responseModel.setStatus(ResponseModel.Status.Created);
         responseModel.setId("1213214A");
         return ResponseEntity.ok(responseModel);
+
     }
 }

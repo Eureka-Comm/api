@@ -1,33 +1,28 @@
-package com.castellanos94.fuzzylogic.api.model;
+package com.castellanos94.fuzzylogic.api.model.impl;
 
-import com.castellanos94.fuzzylogic.api.model.impl.LinguisticState;
-import com.castellanos94.fuzzylogicgp.logic.LogicType;
+import com.castellanos94.fuzzylogic.api.model.Logic;
+import com.castellanos94.fuzzylogic.api.model.Query;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
 
-public class EvaluationQuery {
-    @NotBlank
-    protected String name;
+@Document(collection = "queries")
+public class EvaluationQuery extends Query {
+
     protected String description;
-    @NotBlank
-    protected String dataset;
+
     @NotEmpty
     protected Set<LinguisticState> states;
     @NotNull
-    protected LogicType logicType;
+    protected Logic logic;
     @NotBlank
     protected String predicate;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getDescription() {
         return description;
@@ -37,13 +32,6 @@ public class EvaluationQuery {
         this.description = description;
     }
 
-    public String getDataset() {
-        return dataset;
-    }
-
-    public void setDataset(String dataset) {
-        this.dataset = dataset;
-    }
 
     public Set<LinguisticState> getStates() {
         return states;
@@ -53,12 +41,12 @@ public class EvaluationQuery {
         this.states = states;
     }
 
-    public LogicType getLogicType() {
-        return logicType;
+    public Logic getLogic() {
+        return logic;
     }
 
-    public void setLogicType(LogicType logicType) {
-        this.logicType = logicType;
+    public void setLogic(Logic logic) {
+        this.logic = logic;
     }
 
     public String getPredicate() {
@@ -74,9 +62,8 @@ public class EvaluationQuery {
         return "EvaluationQuery{" +
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", dataset='" + dataset + '\'' +
                 ", states=" + states +
-                ", logicType=" + logicType +
+                ", logic=" + logic +
                 ", predicate='" + predicate + '\'' +
                 '}';
     }

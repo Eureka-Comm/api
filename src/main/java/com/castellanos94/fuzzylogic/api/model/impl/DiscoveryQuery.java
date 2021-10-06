@@ -1,11 +1,14 @@
-package com.castellanos94.fuzzylogic.api.model;
+package com.castellanos94.fuzzylogic.api.model.impl;
 
-import com.castellanos94.fuzzylogic.api.model.impl.Generator;
 import org.hibernate.validator.constraints.Range;
+import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+
+@Document(collection = "queries")
 
 public class DiscoveryQuery extends EvaluationQuery {
 
@@ -122,9 +125,8 @@ public class DiscoveryQuery extends EvaluationQuery {
                 ", adj_min_truth_value=" + adj_min_truth_value +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", dataset='" + dataset + '\'' +
                 ", states=" + states +
-                ", logicType=" + logicType +
+                ", logic=" + logic +
                 ", predicate='" + predicate + '\'' +
                 '}';
     }
