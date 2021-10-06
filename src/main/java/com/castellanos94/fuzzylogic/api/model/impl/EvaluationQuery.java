@@ -2,16 +2,12 @@ package com.castellanos94.fuzzylogic.api.model.impl;
 
 import com.castellanos94.fuzzylogic.api.model.Logic;
 import com.castellanos94.fuzzylogic.api.model.Query;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
 
-@Document(collection = "queries")
 public class EvaluationQuery extends Query {
 
     protected String description;

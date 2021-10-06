@@ -1,6 +1,6 @@
 package com.castellanos94.fuzzylogic.api.controller;
 
-import com.castellanos94.fuzzylogic.api.db.QueryRepository;
+import com.castellanos94.fuzzylogic.api.db.EurekaTaskRepository;
 import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
 import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +22,7 @@ public class InfoController {
     @Autowired
     AsynchronousService service;
     @Autowired
-    QueryRepository queryRepository;
+    EurekaTaskRepository queryRepository;
 
     @Operation(summary = "Show active tasks", description = "Displays the number of currently active and waiting tasks")
     @RequestMapping(value = "server", method = RequestMethod.GET, produces = {"text/plain;charset=UTF-8"})
@@ -34,7 +34,7 @@ public class InfoController {
     @RequestMapping(value = "evaluation", method = RequestMethod.GET, produces = {"application/json"})
     public ResponseEntity<List<EvaluationQuery>> getAllPublicEvaluations() {
         List<EvaluationQuery> queries = new ArrayList<>();
-        queryRepository.findAll().stream().filter(q -> q instanceof EvaluationQuery && q.isPublic()).map(q -> ((EvaluationQuery) q)).forEachOrdered(queries::add);
+        queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery && q.getQuery().isPublic()).map(q -> ((EvaluationQuery) q.getQuery())).forEachOrdered(queries::add);
         if (queries.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -45,7 +45,7 @@ public class InfoController {
     @RequestMapping(value = "discovery", method = RequestMethod.GET, produces = {"application/json"})
     public ResponseEntity<List<DiscoveryQuery>> getAll() {
         List<DiscoveryQuery> queries = new ArrayList<>();
-        queryRepository.findAll().stream().filter(q -> q instanceof DiscoveryQuery && q.isPublic()).map(q -> ((DiscoveryQuery) q)).forEachOrdered(queries::add);
+        queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof DiscoveryQuery && q.getQuery().isPublic()).map(q -> ((DiscoveryQuery) q.getQuery())).forEachOrdered(queries::add);
         if (queries.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

@@ -1,10 +1,11 @@
 package com.castellanos94.fuzzylogic.api.model;
 
+import com.castellanos94.fuzzylogic.api.db.EurekaTask;
+
 public class ResponseModel {
-    public enum Status {Done, Running, Failed, Created}
 
     private String msg = "";
-    private Status status;
+    private EurekaTask.Status status;
     private String id = "";
 
     public String getMsg() {
@@ -16,11 +17,11 @@ public class ResponseModel {
         return this;
     }
 
-    public Status getStatus() {
+    public EurekaTask.Status getStatus() {
         return status;
     }
 
-    public ResponseModel setStatus(Status status) {
+    public ResponseModel setStatus(EurekaTask.Status status) {
         this.status = status;
         return this;
     }
