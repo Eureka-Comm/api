@@ -15,7 +15,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:8081")
 @RestController
@@ -33,13 +35,20 @@ public class QueryController {
     }
 
     @RequestMapping(value = "evaluation", method = RequestMethod.GET, produces = {"application/json"})
-    public ResponseEntity<List<EvaluationQuery>> getEvaluations() {
+    public ResponseEntity<Map<String, Object>> getEvaluations(@RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "3") int size) {
         List<EvaluationQuery> queries = new ArrayList<>();
-        eurekaTaskRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery).map(q -> ((EvaluationQuery) q.getQuery())).forEachOrdered(queries::add);
-        if (queries.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return ResponseEntity.ok(queries);
+        long skipN = (long) page * size;
+        eurekaTaskRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery && !(q.getQuery() instanceof DiscoveryQuery)).map(q -> ((EvaluationQuery) q.getQuery())).skip(skipN).limit(size).forEachOrdered(queries::add);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("queries", queries);
+        response.put("currentPage", page);
+        response.put("totalItems", queries.size());
+        long total = eurekaTaskRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery && !(q.getQuery() instanceof DiscoveryQuery)).map(q -> ((EvaluationQuery) q.getQuery())).count() / size;
+        response.put("totalPages", (total < 1) ? 1 : total);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @RequestMapping(value = "evaluation", method = RequestMethod.POST, consumes = {"application/json"}, produces = {"application/json"})
@@ -88,15 +97,21 @@ public class QueryController {
     }
 
     @RequestMapping(value = "discovery", method = RequestMethod.GET, produces = {"application/json"})
-    public ResponseEntity<List<DiscoveryQuery>> getDiscoveries() {
+    public ResponseEntity<Map<String, Object>> getDiscoveries(@RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "3") int size) {
         List<DiscoveryQuery> queries = new ArrayList<>();
-        eurekaTaskRepository.findAll().stream().filter(q -> q.getQuery() instanceof DiscoveryQuery).map(q -> ((DiscoveryQuery) q.getQuery())).forEachOrdered(queries::add);
-        if (queries.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return ResponseEntity.ok(queries);
-    }
+        long skipN = (long) page * size;
+        eurekaTaskRepository.findAll().stream().filter(q -> q.getQuery() instanceof DiscoveryQuery).map(q -> ((DiscoveryQuery) q.getQuery())).skip(skipN).limit(size).forEachOrdered(queries::add);
 
+        Map<String, Object> response = new HashMap<>();
+        response.put("queries", queries);
+        response.put("currentPage", page);
+        response.put("totalItems", queries.size());
+        long total = eurekaTaskRepository.findAll().stream().filter(q -> q.getQuery() instanceof DiscoveryQuery).map(q -> ((DiscoveryQuery) q.getQuery())).count() / size;
+        response.put("totalPages", (total < 1) ? 1 : total);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @RequestMapping(value = "dataset", method = RequestMethod.POST, consumes = {"multipart/form-data"}, produces = {"application/json"})
     public ResponseEntity<ResponseModel> uploadFile(@RequestParam("file") @Valid @NotNull @NotBlank MultipartFile file) {
