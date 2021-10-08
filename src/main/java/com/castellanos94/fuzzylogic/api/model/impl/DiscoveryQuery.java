@@ -2,7 +2,6 @@ package com.castellanos94.fuzzylogic.api.model.impl;
 
 import com.castellanos94.fuzzylogicgp.core.DummyGenerator;
 import com.castellanos94.fuzzylogicgp.core.NodeTree;
-import com.castellanos94.fuzzylogicgp.core.OperatorException;
 import com.castellanos94.fuzzylogicgp.parser.ParserPredicate;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.data.mongodb.core.mapping.Document;

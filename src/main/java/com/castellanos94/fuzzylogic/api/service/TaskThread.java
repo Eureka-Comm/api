@@ -8,7 +8,6 @@ import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
 import com.castellanos94.fuzzylogicgp.algorithm.EvaluatePredicate;
 import com.castellanos94.fuzzylogicgp.algorithm.KDFLC;
 import com.castellanos94.fuzzylogicgp.core.NodeTree;
-import com.castellanos94.fuzzylogicgp.core.OperatorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,7 @@ import java.util.Date;
 @Scope("prototype")
 public class TaskThread implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskThread.class);
-    private EurekaTask task;
+    private final EurekaTask task;
     @Autowired
     EurekaTaskRepository repository;
 
@@ -48,6 +47,7 @@ public class TaskThread implements Runnable {
         }
         if (predicateTree != null) {
             com.castellanos94.fuzzylogicgp.logic.Logic _logic = null;
+            File output;
             Table table = null;
             try {
                 table = FileUtils.LOAD_DATASET(task.getId());
@@ -60,8 +60,14 @@ public class TaskThread implements Runnable {
                 if (task.getQuery() instanceof EvaluationQuery && !(task.getQuery() instanceof DiscoveryQuery)) {
                     _logic = ((EvaluationQuery) task.getQuery()).getLogic().toInternalObject().build();
                     EvaluatePredicate evaluatePredicate = new EvaluatePredicate(_logic, table);
-                    evaluatePredicate.evaluate(predicateTree);
-                    File output = FileUtils.GET_OUTPUT_FILE(task.getId());
+                    try {
+                        evaluatePredicate.evaluate(predicateTree);
+                    } catch (Exception e) {
+                        LOGGER.error("Evaluation algorithm", e);
+                        task.setMsg("Failed " + new Date());
+                        task.setStatus(EurekaTask.Status.Failed);
+                    }
+                    output = FileUtils.GET_OUTPUT_FILE(task.getId());
                     try {
                         evaluatePredicate.exportToCsv(output.getAbsolutePath());
                         Table result = Table.read().csv(output);
@@ -80,14 +86,27 @@ public class TaskThread implements Runnable {
                         task.setStatus(EurekaTask.Status.Failed);
                     }
                 } else if (task.getQuery() instanceof DiscoveryQuery) {
-                    _logic = ((EvaluationQuery) task.getQuery()).getLogic().toInternalObject().build();
-                   /* KDFLC algorithm = new KDFLC();
-                    algorithm.execute(predicateTree);
-                    algorithm.exportResult();*/
+                    DiscoveryQuery discoveryQuery = (DiscoveryQuery) task.getQuery();
+                    _logic = discoveryQuery.getLogic().toInternalObject().build();
+                    KDFLC algorithm = new KDFLC(_logic, discoveryQuery.getPop_size(), discoveryQuery.getNum_iterations(),
+                            discoveryQuery.getNum_results(), discoveryQuery.getMin_truth_value(), discoveryQuery.getMutation_percentage(),
+                            discoveryQuery.getAdj_pop_size(), discoveryQuery.getAdj_num_iter(), discoveryQuery.getAdj_min_truth_value(), table);
+                    try {
+                        algorithm.execute(predicateTree);
+                        output = FileUtils.GET_OUTPUT_FILE(task.getId());
+                        algorithm.exportResult(output);
+                        task.setMsg("Done " + new Date());
+                        task.setStatus(EurekaTask.Status.Done);
+                    } catch (Exception e) {
+                        LOGGER.error("Discovery algorithm", e);
+                        task.setMsg("Failed " + new Date());
+                        task.setStatus(EurekaTask.Status.Failed);
+                    }
                 }
             }
         }
         repository.save(task);
+        LOGGER.info("End task:" + task.getId());
     }
 
 
