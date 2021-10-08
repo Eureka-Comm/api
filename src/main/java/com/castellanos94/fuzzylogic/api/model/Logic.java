@@ -1,10 +1,14 @@
 package com.castellanos94.fuzzylogic.api.model;
 
 
+import com.castellanos94.fuzzylogicgp.logic.LogicBuilder;
+import com.castellanos94.fuzzylogicgp.logic.LogicType;
+
 import javax.validation.constraints.NotNull;
 
 public class Logic {
-    public static enum LogicType{gmbc,ambc,zadeh,acf,gmbcv}
+    public static enum LogicType {gmbc, ambc, zadeh, acf, gmbcv}
+
     @NotNull
     protected LogicType type;
     protected Integer exponent;
@@ -32,5 +36,13 @@ public class Logic {
 
     public void setNatural_implication(Boolean natural_implication) {
         this.natural_implication = natural_implication;
+    }
+
+    public com.castellanos94.fuzzylogicgp.logic.LogicBuilder toInternalObject() {
+        LogicBuilder lb = LogicBuilder.newBuilder(com.castellanos94.fuzzylogicgp.logic.LogicType.valueOf(type.name().toUpperCase()));
+        lb.setExponent(exponent);
+        if (natural_implication != null)
+            lb.setNatural_implication(natural_implication);
+        return lb;
     }
 }

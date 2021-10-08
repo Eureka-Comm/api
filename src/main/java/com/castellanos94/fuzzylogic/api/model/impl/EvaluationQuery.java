@@ -2,8 +2,6 @@ package com.castellanos94.fuzzylogic.api.model.impl;
 
 import com.castellanos94.fuzzylogic.api.model.Logic;
 import com.castellanos94.fuzzylogic.api.model.Query;
-import com.castellanos94.fuzzylogicgp.core.NodeTree;
-import com.castellanos94.fuzzylogicgp.core.OperatorException;
 import com.castellanos94.fuzzylogicgp.core.StateNode;
 import com.castellanos94.fuzzylogicgp.parser.ParserPredicate;
 
@@ -64,15 +62,9 @@ public class EvaluationQuery extends Query {
      * @return NodeTree, si es nulo ocurrio un error en parser
      */
     @Override
-    public com.castellanos94.fuzzylogicgp.core.NodeTree getPredicateTree() {
+    public com.castellanos94.fuzzylogicgp.core.NodeTree getPredicateTree() throws Exception {
         ParserPredicate parserPredicate = new ParserPredicate(this.predicate, convertStates(), new ArrayList<>());
-        NodeTree parser = null;
-        try {
-            parser = parserPredicate.parser();
-        } catch (OperatorException | CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-        return parser;
+        return parserPredicate.parser();
     }
 
     protected ArrayList<StateNode> convertStates() {

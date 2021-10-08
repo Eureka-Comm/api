@@ -3,7 +3,6 @@ package com.castellanos94.fuzzylogic.api.model.impl;
 import com.castellanos94.fuzzylogicgp.core.DummyGenerator;
 import com.castellanos94.fuzzylogicgp.core.NodeTree;
 import com.castellanos94.fuzzylogicgp.core.OperatorException;
-import com.castellanos94.fuzzylogicgp.core.Query;
 import com.castellanos94.fuzzylogicgp.parser.ParserPredicate;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -51,15 +50,10 @@ public class DiscoveryQuery extends EvaluationQuery {
      * @return null si ocurrio un error, de otra forma NodeTree
      */
     @Override
-    public NodeTree getPredicateTree() {
+    public NodeTree getPredicateTree() throws Exception {
         ParserPredicate parserPredicate = new ParserPredicate(this.predicate, convertStates(), convertToDummyGenerator());
-        NodeTree parser = null;
-        try {
-            parser = parserPredicate.parser();
-        } catch (OperatorException | CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-        return parser;
+
+        return parserPredicate.parser();
     }
 
     /**

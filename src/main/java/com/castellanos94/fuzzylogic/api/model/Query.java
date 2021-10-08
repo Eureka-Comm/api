@@ -2,6 +2,8 @@ package com.castellanos94.fuzzylogic.api.model;
 
 
 import com.castellanos94.fuzzylogicgp.core.NodeTree;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.Hidden;
 
 import javax.validation.constraints.NotBlank;
 
@@ -28,6 +30,7 @@ public abstract class Query {
         return isPublic;
     }
 
-
-    public abstract NodeTree getPredicateTree();
+    @Hidden
+    @JsonIgnore
+    public abstract NodeTree getPredicateTree() throws Exception;
 }

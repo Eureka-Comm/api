@@ -2,19 +2,26 @@ package com.castellanos94.fuzzylogic.api.controller;
 
 import com.castellanos94.fuzzylogic.api.db.EurekaTask;
 import com.castellanos94.fuzzylogic.api.db.EurekaTaskRepository;
+import com.castellanos94.fuzzylogic.api.db.FileUtils;
+import com.castellanos94.fuzzylogic.api.model.Query;
 import com.castellanos94.fuzzylogic.api.model.ResponseModel;
 import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
 import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
 import com.castellanos94.fuzzylogic.api.service.AsynchronousService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 
 @CrossOrigin(origins = "http://localhost:8081")
@@ -26,15 +33,13 @@ public class QueryController {
     AsynchronousService service;
 
 
-    @RequestMapping(value = "run/{id}", method = RequestMethod.PUT, produces = {"application/json"})
-    public ResponseEntity<ResponseModel> callRunner(@PathVariable String id) {
+    @RequestMapping(value = "query/{id}", method = RequestMethod.GET, produces = {"application/json"})
+    public ResponseEntity<EurekaTask> getQuery(@PathVariable String id) {
         Optional<EurekaTask> optionalEurekaTask = eurekaTaskRepository.findById(id);
         if (optionalEurekaTask.isPresent()) {
-            service.executeAsynchronously(optionalEurekaTask.get());
-        } else {
-            return ResponseEntity.badRequest().body(new ResponseModel().setId(id).setMsg("Query not found"));
+            return ResponseEntity.ok(optionalEurekaTask.get());
         }
-        return ResponseEntity.ok(new ResponseModel().setStatus(EurekaTask.Status.Running));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @RequestMapping(value = "evaluation", method = RequestMethod.GET, produces = {"application/json"})
@@ -116,19 +121,48 @@ public class QueryController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "dataset", method = RequestMethod.POST, consumes = {"multipart/form-data"}, produces = {"application/json"})
-    public ResponseEntity<ResponseModel> uploadFile(@RequestParam("file") @Valid @NotNull @NotBlank MultipartFile file) {
-        ResponseModel responseModel = new ResponseModel();
-
-        if (!Utils.isCSVFile(file)) {
-            responseModel.setStatus(EurekaTask.Status.Failed);
-            responseModel.setMsg("Only CSV files are supported");
-            return ResponseEntity.badRequest().body(responseModel);
+    @RequestMapping(value = "result/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity dowloadResult(@PathVariable String id, HttpServletResponse response) throws IOException {
+        Optional<EurekaTask> task = eurekaTaskRepository.findById(id);
+        if (task.isPresent()) {
+            File file = FileUtils.GET_OUTPUT_FILE(id);
+            if (file.exists()) {
+                Files.copy(file.toPath(), response.getOutputStream());
+                return ResponseEntity.ok()
+                        .header("Content-Disposition", "attachment; filename=" + file.getName() )
+                        .contentLength(file.length())
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .body(new FileSystemResource(file));
+            }
+            return ResponseEntity.noContent().build();
         }
-        FileUploadController.printFileDetails(file);
-        responseModel.setStatus(EurekaTask.Status.Created);
-        responseModel.setId("1213214A");
-        return ResponseEntity.ok(responseModel);
+        return ResponseEntity.badRequest().build();
+    }
+
+    @RequestMapping(value = "dataset/{id}", method = RequestMethod.POST, consumes = {"multipart/form-data"}, produces = {"application/json"})
+    public ResponseEntity<ResponseModel> uploadFile(@PathVariable String
+                                                            id, @RequestParam("file") @Valid @NotNull @NotBlank MultipartFile file) throws IOException {
+        ResponseModel responseModel = new ResponseModel();
+        Optional<EurekaTask> task = eurekaTaskRepository.findById(id);
+        if (task.isPresent()) {
+            if (!Utils.isCSVFile(file)) {
+                responseModel.setStatus(EurekaTask.Status.Failed);
+                responseModel.setMsg("Only CSV files are supported");
+                return ResponseEntity.badRequest().body(responseModel);
+            }
+            if (FileUtils.SAVE_DATASET(id, file.getInputStream())) {
+                responseModel.setStatus(EurekaTask.Status.Created);
+                responseModel.setMsg("Temporarily saved datasets, task queued for execution.");
+                service.executeAsynchronously(task.get());
+            } else {
+                responseModel.setStatus(EurekaTask.Status.Failed);
+                responseModel.setMsg("Error saving the file");
+            }
+            responseModel.setId(id);
+            return ResponseEntity.ok(responseModel);
+        } else {
+            return ResponseEntity.badRequest().body(new ResponseModel().setMsg("Id not found"));
+        }
 
     }
 }

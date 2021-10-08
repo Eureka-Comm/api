@@ -14,6 +14,7 @@ public class EurekaTask {
     protected Query query;
 
     protected String userId;
+    protected String msg;
 
     public EurekaTask() {
         this.status = Status.Created;
@@ -25,6 +26,15 @@ public class EurekaTask {
 
     public String getId() {
         return id;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public EurekaTask setMsg(String msg) {
+        this.msg = msg;
+        return this;
     }
 
     public EurekaTask setId(String id) {
