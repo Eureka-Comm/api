@@ -1,6 +1,8 @@
 package com.castellanos94.fuzzylogic.api.model;
 
 
+import com.castellanos94.fuzzylogicgp.core.NodeTree;
+
 import javax.validation.constraints.NotBlank;
 
 public abstract class Query {
@@ -25,4 +27,7 @@ public abstract class Query {
     public boolean isPublic() {
         return isPublic;
     }
+
+
+    public abstract NodeTree getPredicateTree();
 }

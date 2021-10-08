@@ -1,4 +1,4 @@
-package com.castellanos94.fuzzylogic.api.controller;
+package com.castellanos94.fuzzylogic.api.service;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

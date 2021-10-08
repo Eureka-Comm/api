@@ -1,5 +1,7 @@
 package com.castellanos94.fuzzylogic.api.model;
 
+import com.castellanos94.fuzzylogicgp.core.Node;
+
 import javax.validation.constraints.NotBlank;
 
 public abstract class Base {
@@ -22,4 +24,5 @@ public abstract class Base {
     public void setDescription(String description) {
         this.description = description;
     }
+    public abstract Node toInternalObject();
 }

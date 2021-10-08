@@ -2,6 +2,8 @@ package com.castellanos94.fuzzylogic.api.model.impl;
 
 import com.castellanos94.fuzzylogic.api.model.Base;
 import com.castellanos94.fuzzylogic.api.model.MembershipFunction;
+import com.castellanos94.fuzzylogicgp.core.Node;
+import com.castellanos94.fuzzylogicgp.core.StateNode;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -51,5 +53,15 @@ public class LinguisticState extends Base {
                 ", cname='" + cname + '\'' +
                 ", f=" + f +
                 '}';
+    }
+
+    @Override
+    public StateNode toInternalObject() {
+        StateNode stateNode = new StateNode(label, cname);
+        if (f != null) {
+            stateNode.setMembershipFunction(f.toInternalObject());
+        }
+        stateNode.setDescription(description);
+        return stateNode;
     }
 }

@@ -1,12 +1,18 @@
 package com.castellanos94.fuzzylogic.api.model.impl;
 
+import com.castellanos94.fuzzylogicgp.core.DummyGenerator;
+import com.castellanos94.fuzzylogicgp.core.NodeTree;
+import com.castellanos94.fuzzylogicgp.core.OperatorException;
+import com.castellanos94.fuzzylogicgp.core.Query;
+import com.castellanos94.fuzzylogicgp.parser.ParserPredicate;
 import org.hibernate.validator.constraints.Range;
-import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Document(collection = "queries")
 
@@ -38,6 +44,36 @@ public class DiscoveryQuery extends EvaluationQuery {
     @NotNull
     @Range(min = 0, max = 1)
     protected float adj_min_truth_value;
+
+    /**
+     * Retorna un predicado en la estructura interna segun la tarea de descubrimiento
+     *
+     * @return null si ocurrio un error, de otra forma NodeTree
+     */
+    @Override
+    public NodeTree getPredicateTree() {
+        ParserPredicate parserPredicate = new ParserPredicate(this.predicate, convertStates(), convertToDummyGenerator());
+        NodeTree parser = null;
+        try {
+            parser = parserPredicate.parser();
+        } catch (OperatorException | CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return parser;
+    }
+
+    /**
+     * Transforma a una lista de dummy generatos
+     *
+     * @return dummygenerators
+     */
+    protected List<DummyGenerator> convertToDummyGenerator() {
+
+        if (generators != null) {
+            return generators.stream().map(Generator::toInternalObject).collect(Collectors.toList());
+        }
+        return List.of();
+    }
 
     public ArrayList<Generator> getGenerators() {
         return generators;

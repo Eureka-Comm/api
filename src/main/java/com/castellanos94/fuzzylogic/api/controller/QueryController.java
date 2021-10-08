@@ -5,6 +5,7 @@ import com.castellanos94.fuzzylogic.api.db.EurekaTaskRepository;
 import com.castellanos94.fuzzylogic.api.model.ResponseModel;
 import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
 import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
+import com.castellanos94.fuzzylogic.api.service.AsynchronousService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @CrossOrigin(origins = "http://localhost:8081")
 @RestController
@@ -28,9 +26,14 @@ public class QueryController {
     AsynchronousService service;
 
 
-    @RequestMapping(value = "run", method = RequestMethod.POST, produces = {"application/json"})
-    public ResponseEntity<ResponseModel> callRunner() {
-        service.executeAsynchronously();
+    @RequestMapping(value = "run/{id}", method = RequestMethod.PUT, produces = {"application/json"})
+    public ResponseEntity<ResponseModel> callRunner(@PathVariable String id) {
+        Optional<EurekaTask> optionalEurekaTask = eurekaTaskRepository.findById(id);
+        if (optionalEurekaTask.isPresent()) {
+            service.executeAsynchronously(optionalEurekaTask.get());
+        } else {
+            return ResponseEntity.badRequest().body(new ResponseModel().setId(id).setMsg("Query not found"));
+        }
         return ResponseEntity.ok(new ResponseModel().setStatus(EurekaTask.Status.Running));
     }
 

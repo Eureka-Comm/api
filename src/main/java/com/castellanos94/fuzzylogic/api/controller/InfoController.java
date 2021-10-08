@@ -3,6 +3,7 @@ package com.castellanos94.fuzzylogic.api.controller;
 import com.castellanos94.fuzzylogic.api.db.EurekaTaskRepository;
 import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
 import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
+import com.castellanos94.fuzzylogic.api.service.AsynchronousService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
