@@ -88,9 +88,9 @@ public class TaskThread implements Runnable {
                 } else if (task.getQuery() instanceof DiscoveryQuery) {
                     DiscoveryQuery discoveryQuery = (DiscoveryQuery) task.getQuery();
                     _logic = discoveryQuery.getLogic().toInternalObject().build();
-                    KDFLC algorithm = new KDFLC(_logic, discoveryQuery.getPop_size(), discoveryQuery.getNum_iterations(),
-                            discoveryQuery.getNum_results(), discoveryQuery.getMin_truth_value(), discoveryQuery.getMutation_percentage(),
-                            discoveryQuery.getAdj_pop_size(), discoveryQuery.getAdj_num_iter(), discoveryQuery.getAdj_min_truth_value(), table);
+                    KDFLC algorithm = new KDFLC(_logic, discoveryQuery.getPopulationSize(), discoveryQuery.getNumberOfIterations(),
+                            discoveryQuery.getNumberOfResults(), discoveryQuery.getMinimumTruthValue(), discoveryQuery.getMutationRate(),
+                            discoveryQuery.getAdjPopulationSize(), discoveryQuery.getAdjNumberOfIterations(), discoveryQuery.getAdjMinimumTruthValue(), table);
                     try {
                         algorithm.execute(predicateTree);
                         output = FileUtils.GET_OUTPUT_FILE(task.getId());

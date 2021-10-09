@@ -36,8 +36,15 @@ public class QueryController {
     @RequestMapping(value = "query/{id}", method = RequestMethod.GET, produces = {"application/json"})
     public ResponseEntity<EurekaTask> getQuery(@PathVariable String id) {
         Optional<EurekaTask> optionalEurekaTask = eurekaTaskRepository.findById(id);
+        return optionalEurekaTask.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NO_CONTENT).build());
+    }
+
+    @RequestMapping(value = "query/status/{id}", method = RequestMethod.GET, produces = {"application/json"})
+    public ResponseEntity<ResponseModel> getQueryStatus(@PathVariable String id) {
+        Optional<EurekaTask> optionalEurekaTask = eurekaTaskRepository.findById(id);
         if (optionalEurekaTask.isPresent()) {
-            return ResponseEntity.ok(optionalEurekaTask.get());
+            EurekaTask task = optionalEurekaTask.get();
+            return ResponseEntity.ok(new ResponseModel().setStatus(task.getStatus()).setMsg(task.getMsg()).setId(task.getId()));
         }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -129,7 +136,7 @@ public class QueryController {
             if (file.exists()) {
                 Files.copy(file.toPath(), response.getOutputStream());
                 return ResponseEntity.ok()
-                        .header("Content-Disposition", "attachment; filename=" + file.getName() )
+                        .header("Content-Disposition", "attachment; filename=" + file.getName())
                         .contentLength(file.length())
                         .contentType(MediaType.APPLICATION_OCTET_STREAM)
                         .body(new FileSystemResource(file));

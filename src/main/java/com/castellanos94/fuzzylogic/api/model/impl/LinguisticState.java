@@ -2,7 +2,6 @@ package com.castellanos94.fuzzylogic.api.model.impl;
 
 import com.castellanos94.fuzzylogic.api.model.Base;
 import com.castellanos94.fuzzylogic.api.model.MembershipFunction;
-import com.castellanos94.fuzzylogicgp.core.Node;
 import com.castellanos94.fuzzylogicgp.core.StateNode;
 
 import javax.validation.constraints.NotBlank;

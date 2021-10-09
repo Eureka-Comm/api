@@ -6,11 +6,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.Hidden;
 
 import javax.validation.constraints.NotBlank;
+import java.util.Set;
 
 public abstract class Query {
 
     @NotBlank
     protected String name;
+
+    protected Set<String> tags;
 
     protected boolean isPublic;
 
@@ -28,6 +31,14 @@ public abstract class Query {
 
     public boolean isPublic() {
         return isPublic;
+    }
+
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<String> tags) {
+        this.tags = tags;
     }
 
     @Hidden

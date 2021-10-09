@@ -8,40 +8,41 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Document(collection = "queries")
 
 public class DiscoveryQuery extends EvaluationQuery {
 
-    protected ArrayList<Generator> generators;
 
     @NotNull
     @Min(value = 1)
-    protected int pop_size;
+    protected int populationSize;
     @NotNull
     @Min(value = 1)
-    protected int num_results;
+    protected int numberOfResults;
     @NotNull
     @Min(value = 1)
-    protected int num_iterations;
+    protected int numberOfIterations;
     @NotNull
     @Range(min = 0, max = 1)
-    protected float mutation_percentage;
+    protected float mutationRate;
     @NotNull
     @Range(min = 0, max = 1)
-    protected float min_truth_value;
+    protected float minimumTruthValue;
     @NotNull
     @Min(value = 1)
-    protected int adj_pop_size;
+    protected int adjPopulationSize;
     @NotNull
     @Min(value = 1)
-    protected int adj_num_iter;
+    protected int adjNumberOfIterations;
     @NotNull
     @Range(min = 0, max = 1)
-    protected float adj_min_truth_value;
+    protected float adjMinimumTruthValue;
+    protected Set<Generator> generators;
+
 
     /**
      * Retorna un predicado en la estructura interna segun la tarea de descubrimiento
@@ -68,91 +69,93 @@ public class DiscoveryQuery extends EvaluationQuery {
         return List.of();
     }
 
-    public ArrayList<Generator> getGenerators() {
+    public int getPopulationSize() {
+        return populationSize;
+    }
+
+    public void setPopulationSize(int populationSize) {
+        this.populationSize = populationSize;
+    }
+
+    public int getNumberOfResults() {
+        return numberOfResults;
+    }
+
+    public void setNumberOfResults(int numberOfResults) {
+        this.numberOfResults = numberOfResults;
+    }
+
+    public int getNumberOfIterations() {
+        return numberOfIterations;
+    }
+
+    public void setNumberOfIterations(int numberOfIterations) {
+        this.numberOfIterations = numberOfIterations;
+    }
+
+    public float getMutationRate() {
+        return mutationRate;
+    }
+
+    public void setMutationRate(float mutationRate) {
+        this.mutationRate = mutationRate;
+    }
+
+    public float getMinimumTruthValue() {
+        return minimumTruthValue;
+    }
+
+    public void setMinimumTruthValue(float minimumTruthValue) {
+        this.minimumTruthValue = minimumTruthValue;
+    }
+
+    public int getAdjPopulationSize() {
+        return adjPopulationSize;
+    }
+
+    public void setAdjPopulationSize(int adjPopulationSize) {
+        this.adjPopulationSize = adjPopulationSize;
+    }
+
+    public int getAdjNumberOfIterations() {
+        return adjNumberOfIterations;
+    }
+
+    public void setAdjNumberOfIterations(int adjNumberOfIterations) {
+        this.adjNumberOfIterations = adjNumberOfIterations;
+    }
+
+    public float getAdjMinimumTruthValue() {
+        return adjMinimumTruthValue;
+    }
+
+    public void setAdjMinimumTruthValue(float adjMinimumTruthValue) {
+        this.adjMinimumTruthValue = adjMinimumTruthValue;
+    }
+
+    public Set<Generator> getGenerators() {
         return generators;
     }
 
-    public void setGenerators(ArrayList<Generator> generators) {
+    public void setGenerators(Set<Generator> generators) {
         this.generators = generators;
-    }
-
-    public int getPop_size() {
-        return pop_size;
-    }
-
-    public void setPop_size(int pop_size) {
-        this.pop_size = pop_size;
-    }
-
-    public int getNum_results() {
-        return num_results;
-    }
-
-    public void setNum_results(int num_results) {
-        this.num_results = num_results;
-    }
-
-    public int getNum_iterations() {
-        return num_iterations;
-    }
-
-    public void setNum_iterations(int num_iterations) {
-        this.num_iterations = num_iterations;
-    }
-
-    public float getMutation_percentage() {
-        return mutation_percentage;
-    }
-
-    public void setMutation_percentage(float mutation_percentage) {
-        this.mutation_percentage = mutation_percentage;
-    }
-
-    public float getMin_truth_value() {
-        return min_truth_value;
-    }
-
-    public void setMin_truth_value(float min_truth_value) {
-        this.min_truth_value = min_truth_value;
-    }
-
-    public int getAdj_pop_size() {
-        return adj_pop_size;
-    }
-
-    public void setAdj_pop_size(int adj_pop_size) {
-        this.adj_pop_size = adj_pop_size;
-    }
-
-    public int getAdj_num_iter() {
-        return adj_num_iter;
-    }
-
-    public void setAdj_num_iter(int adj_num_iter) {
-        this.adj_num_iter = adj_num_iter;
-    }
-
-    public float getAdj_min_truth_value() {
-        return adj_min_truth_value;
-    }
-
-    public void setAdj_min_truth_value(float adj_min_truth_value) {
-        this.adj_min_truth_value = adj_min_truth_value;
     }
 
     @Override
     public String toString() {
         return "DiscoveryQuery{" +
-                "generators=" + generators +
-                ", pop_size=" + pop_size +
-                ", num_results=" + num_results +
-                ", num_iterations=" + num_iterations +
-                ", mutation_percentage=" + mutation_percentage +
-                ", min_truth_value=" + min_truth_value +
-                ", adj_pop_size=" + adj_pop_size +
-                ", adj_num_iter=" + adj_num_iter +
-                ", adj_min_truth_value=" + adj_min_truth_value +
-                ", name='" + name + '\'' +
+                "name='" + name + '\'' +
+                ", tags=" + tags +
+                ", isPublic=" + isPublic +
+                ", populationSize=" + populationSize +
+                ", numberOfResults=" + numberOfResults +
+                ", numberOfIterations=" + numberOfIterations +
+                ", mutationRate=" + mutationRate +
+                ", minimumTruthValue=" + minimumTruthValue +
+                ", adjPopulationSize=" + adjPopulationSize +
+                ", adjNumberOfIterations=" + adjNumberOfIterations +
+                ", adjMinimumTruthValue=" + adjMinimumTruthValue +
+                ", generators=" + generators +
                 ", description='" + description + '\'' +
                 ", states=" + states +
                 ", logic=" + logic +
