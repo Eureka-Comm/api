@@ -6,16 +6,16 @@ import com.castellanos94.fuzzylogicgp.membershipfunction.MembershipFunctionType;
 import javax.validation.constraints.NotNull;
 public class FPG extends MembershipFunction {
     @NotNull
-    protected double beta;
+    protected Double beta;
     @NotNull
-    protected double gamma;
+    protected Double gamma;
     @NotNull
-    protected double m;
+    protected Double m;
     public FPG(){
         super(MembershipFunctionType.FPG);
     }
 
-    public double getGamma() {
+    public Double getGamma() {
         return gamma;
     }
 
@@ -23,7 +23,7 @@ public class FPG extends MembershipFunction {
         this.gamma = gamma;
     }
 
-    public double getBeta() {
+    public Double getBeta() {
         return beta;
     }
 
@@ -31,7 +31,7 @@ public class FPG extends MembershipFunction {
         this.beta = beta;
     }
 
-    public double getM() {
+    public Double getM() {
         return m;
     }
 

@@ -13,6 +13,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -67,6 +68,7 @@ public class QueryController {
     }
 
     @RequestMapping(value = "evaluation", method = RequestMethod.POST, consumes = {"application/json"}, produces = {"application/json"})
+    @Validated
     public ResponseEntity<ResponseModel> upload(@RequestBody @Valid EvaluationQuery evaluationQuery) {
         StringBuilder msgBuilder = new StringBuilder();
         evaluationQuery.getStates().stream().filter(s -> s.getF() == null).forEachOrdered(linguisticState -> msgBuilder.append(linguisticState.getLabel()).append(", "));
@@ -129,12 +131,11 @@ public class QueryController {
     }
 
     @RequestMapping(value = "result/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity dowloadResult(@PathVariable String id, HttpServletResponse response) throws IOException {
+    public ResponseEntity dowloadResult(@PathVariable String id) throws IOException {
         Optional<EurekaTask> task = eurekaTaskRepository.findById(id);
         if (task.isPresent()) {
             File file = FileUtils.GET_OUTPUT_FILE(id);
             if (file.exists()) {
-                Files.copy(file.toPath(), response.getOutputStream());
                 return ResponseEntity.ok()
                         .header("Content-Disposition", "attachment; filename=" + file.getName())
                         .contentLength(file.length())
