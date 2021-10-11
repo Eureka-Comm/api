@@ -1,8 +1,11 @@
 package com.castellanos94.fuzzylogic.api.model;
 
 import com.castellanos94.fuzzylogicgp.core.Node;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.validation.constraints.NotBlank;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 
 public abstract class Base {
     @NotBlank
@@ -24,5 +27,6 @@ public abstract class Base {
     public void setDescription(String description) {
         this.description = description;
     }
+
     public abstract Node toInternalObject();
 }

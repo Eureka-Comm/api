@@ -3,10 +3,10 @@ package com.castellanos94.fuzzylogic.api.controller;
 import com.castellanos94.fuzzylogic.api.db.EurekaTask;
 import com.castellanos94.fuzzylogic.api.db.EurekaTaskRepository;
 import com.castellanos94.fuzzylogic.api.db.FileUtils;
-import com.castellanos94.fuzzylogic.api.model.Query;
 import com.castellanos94.fuzzylogic.api.model.ResponseModel;
 import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
 import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
+import com.castellanos94.fuzzylogic.api.model.impl.LinguisticState;
 import com.castellanos94.fuzzylogic.api.service.AsynchronousService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -17,12 +17,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.io.*;
-import java.nio.file.Files;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 @CrossOrigin(origins = "http://localhost:8081")
@@ -71,7 +70,9 @@ public class QueryController {
     @Validated
     public ResponseEntity<ResponseModel> upload(@RequestBody @Valid EvaluationQuery evaluationQuery) {
         StringBuilder msgBuilder = new StringBuilder();
-        evaluationQuery.getStates().stream().filter(s -> s.getF() == null).forEachOrdered(linguisticState -> msgBuilder.append(linguisticState.getLabel()).append(", "));
+        evaluationQuery.getStates().stream().filter(s -> s.getF() == null || (s.getF()!=null && !s.getF().isValid()))
+                .forEachOrdered(linguisticState -> msgBuilder.append(linguisticState.getLabel()).append(", "));
+
         ResponseModel responseModel = new ResponseModel();
         if (msgBuilder.length() > 0) {
             responseModel.setStatus(EurekaTask.Status.Failed);

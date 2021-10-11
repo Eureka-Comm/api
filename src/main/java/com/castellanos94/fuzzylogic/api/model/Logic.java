@@ -2,10 +2,10 @@ package com.castellanos94.fuzzylogic.api.model;
 
 
 import com.castellanos94.fuzzylogicgp.logic.LogicBuilder;
-import com.castellanos94.fuzzylogicgp.logic.LogicType;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.validation.constraints.NotNull;
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Logic {
     public static enum LogicType {gmbc, ambc, zadeh, acf, gmbcv}
 

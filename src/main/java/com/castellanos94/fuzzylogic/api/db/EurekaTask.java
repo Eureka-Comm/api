@@ -1,10 +1,13 @@
 package com.castellanos94.fuzzylogic.api.db;
 
 import com.castellanos94.fuzzylogic.api.model.Query;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "queries")
+@JsonInclude(JsonInclude.Include.NON_NULL)
+
 public class EurekaTask {
     public enum Status {Done, Running, Failed, Created}
 

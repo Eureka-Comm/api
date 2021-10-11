@@ -2,6 +2,7 @@ package com.castellanos94.fuzzylogic.api.model.impl;
 
 import com.castellanos94.fuzzylogic.api.model.MembershipFunction;
 import com.castellanos94.fuzzylogicgp.membershipfunction.MembershipFunctionType;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.validation.constraints.NotNull;
 public class FPG extends MembershipFunction {
@@ -11,7 +12,8 @@ public class FPG extends MembershipFunction {
     protected Double gamma;
     @NotNull
     protected Double m;
-    public FPG(){
+
+    public FPG() {
         super(MembershipFunctionType.FPG);
     }
 
@@ -41,7 +43,12 @@ public class FPG extends MembershipFunction {
 
     @Override
     public com.castellanos94.fuzzylogicgp.membershipfunction.MembershipFunction toInternalObject() {
-        return  new com.castellanos94.fuzzylogicgp.membershipfunction.FPG(beta,gamma,m);
+        return new com.castellanos94.fuzzylogicgp.membershipfunction.FPG(beta, gamma, m);
+    }
+
+    @Override
+    public Boolean isValid() {
+        return beta != null && gamma != null && m != null;
     }
 
     @Override

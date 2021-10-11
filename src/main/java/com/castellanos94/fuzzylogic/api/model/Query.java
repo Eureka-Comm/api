@@ -3,11 +3,13 @@ package com.castellanos94.fuzzylogic.api.model;
 
 import com.castellanos94.fuzzylogicgp.core.NodeTree;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.Hidden;
 
 import javax.validation.constraints.NotBlank;
 import java.util.Set;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class Query {
 
     @NotBlank

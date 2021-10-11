@@ -7,42 +7,48 @@ import javax.validation.constraints.NotNull;
 
 public class Triangular extends MembershipFunction {
     @NotNull
-    protected double a;
+    protected Double a;
     @NotNull
-    protected double b;
+    protected Double b;
     @NotNull
-    protected double c;
-    public Triangular(){
+    protected Double c;
+
+    public Triangular() {
         super(MembershipFunctionType.TRIANGULAR);
     }
 
-    public double getA() {
+    public Double getA() {
         return a;
     }
 
-    public void setA(double a) {
+    public void setA(Double a) {
         this.a = a;
     }
 
-    public double getB() {
+    public Double getB() {
         return b;
     }
 
-    public void setB(double b) {
+    public void setB(Double b) {
         this.b = b;
     }
 
-    public double getC() {
+    public Double getC() {
         return c;
     }
 
-    public void setC(double c) {
+    public void setC(Double c) {
         this.c = c;
     }
 
     @Override
     public com.castellanos94.fuzzylogicgp.membershipfunction.MembershipFunction toInternalObject() {
-        return new com.castellanos94.fuzzylogicgp.membershipfunction.Triangular(a,b,c);
+        return new com.castellanos94.fuzzylogicgp.membershipfunction.Triangular(a, b, c);
+    }
+
+    @Override
+    public Boolean isValid() {
+        return a != null && b != null && c != null;
     }
 
 }

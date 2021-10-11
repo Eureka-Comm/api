@@ -2,37 +2,47 @@ package com.castellanos94.fuzzylogic.api.model.impl;
 
 import com.castellanos94.fuzzylogic.api.model.MembershipFunction;
 import com.castellanos94.fuzzylogicgp.membershipfunction.MembershipFunctionType;
+import io.swagger.v3.oas.annotations.Hidden;
 
 import javax.validation.constraints.NotNull;
 
+
 public class Sigmoid extends MembershipFunction {
     @NotNull
-    private double center;
+    private Double center;
     @NotNull
-    private double beta;
+    private Double beta;
+
     protected Sigmoid() {
         super(MembershipFunctionType.SIGMOID);
     }
 
-    public double getCenter() {
+
+    @Override
+    public com.castellanos94.fuzzylogicgp.membershipfunction.MembershipFunction toInternalObject() {
+        return new com.castellanos94.fuzzylogicgp.membershipfunction.Sigmoid(center, beta);
+    }
+
+    public Double getCenter() {
         return center;
     }
 
-    public void setCenter(double center) {
+    public void setCenter(Double center) {
         this.center = center;
     }
 
-    public double getBeta() {
+    public Double getBeta() {
         return beta;
     }
 
-    public void setBeta(double beta) {
+    public void setBeta(Double beta) {
         this.beta = beta;
     }
 
     @Override
-    public com.castellanos94.fuzzylogicgp.membershipfunction.MembershipFunction toInternalObject() {
-        return new com.castellanos94.fuzzylogicgp.membershipfunction.Sigmoid(center,beta);
+    @Hidden
+    public Boolean isValid() {
+        return center != null && beta != null;
     }
 
     @Override

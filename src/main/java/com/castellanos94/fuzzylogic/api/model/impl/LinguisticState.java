@@ -4,6 +4,7 @@ import com.castellanos94.fuzzylogic.api.model.Base;
 import com.castellanos94.fuzzylogic.api.model.MembershipFunction;
 import com.castellanos94.fuzzylogicgp.core.StateNode;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
@@ -12,7 +13,7 @@ public class LinguisticState extends Base {
     @NotNull
     @NotBlank
     protected String cname;
-
+    @Valid
     protected MembershipFunction f;
 
 
