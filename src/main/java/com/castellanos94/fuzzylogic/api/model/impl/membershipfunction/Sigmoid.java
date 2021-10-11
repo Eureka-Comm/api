@@ -1,4 +1,4 @@
-package com.castellanos94.fuzzylogic.api.model.impl;
+package com.castellanos94.fuzzylogic.api.model.impl.membershipfunction;
 
 import com.castellanos94.fuzzylogic.api.model.MembershipFunction;
 import com.castellanos94.fuzzylogicgp.membershipfunction.MembershipFunctionType;
@@ -13,7 +13,7 @@ public class Sigmoid extends MembershipFunction {
     @NotNull
     private Double beta;
 
-    protected Sigmoid() {
+    public Sigmoid() {
         super(MembershipFunctionType.SIGMOID);
     }
 

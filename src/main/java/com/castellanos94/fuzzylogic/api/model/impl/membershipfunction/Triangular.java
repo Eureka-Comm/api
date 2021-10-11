@@ -1,4 +1,4 @@
-package com.castellanos94.fuzzylogic.api.model.impl;
+package com.castellanos94.fuzzylogic.api.model.impl.membershipfunction;
 
 import com.castellanos94.fuzzylogic.api.model.MembershipFunction;
 import com.castellanos94.fuzzylogicgp.membershipfunction.MembershipFunctionType;
