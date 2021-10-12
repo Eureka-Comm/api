@@ -59,6 +59,8 @@ public class TaskThread implements Runnable {
             if (table != null) {
                 if (task.getQuery() instanceof EvaluationQuery && !(task.getQuery() instanceof DiscoveryQuery)) {
                     _logic = ((EvaluationQuery) task.getQuery()).getLogic().toInternalObject().build();
+                    System.out.println(((EvaluationQuery)task.getQuery()).getLogic());
+                    System.out.println( ((EvaluationQuery) task.getQuery()).getLogic().toInternalObject());
                     EvaluatePredicate evaluatePredicate = new EvaluatePredicate(_logic, table);
                     try {
                         evaluatePredicate.evaluate(predicateTree);

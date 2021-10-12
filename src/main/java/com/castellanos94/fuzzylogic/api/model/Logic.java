@@ -45,4 +45,13 @@ public class Logic {
             lb.setNatural_implication(natural_implication);
         return lb;
     }
+
+    @Override
+    public String toString() {
+        return "Logic{" +
+                "type=" + type +
+                ", exponent=" + exponent +
+                ", natural_implication=" + natural_implication +
+                '}';
+    }
 }
