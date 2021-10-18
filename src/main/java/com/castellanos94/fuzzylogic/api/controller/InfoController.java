@@ -44,6 +44,7 @@ public class InfoController {
         queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery && !(q.getQuery() instanceof DiscoveryQuery) && q.getQuery().isPublic()).skip(skipN).limit(size).forEachOrdered(eurekaTask -> {
             eurekaTask.setUserId(null);
             eurekaTask.setStatus(null);
+            queries.add(eurekaTask);
         });
 
         Map<String, Object> response = new HashMap<>();
@@ -65,6 +66,7 @@ public class InfoController {
         queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof DiscoveryQuery && q.getQuery().isPublic()).skip(skipN).limit(size).forEachOrdered(eurekaTask -> {
             eurekaTask.setUserId(null);
             eurekaTask.setStatus(null);
+            queries.add(eurekaTask);
         });
 
         Map<String, Object> response = new HashMap<>();
