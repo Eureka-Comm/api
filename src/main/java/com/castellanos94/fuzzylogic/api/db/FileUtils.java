@@ -57,6 +57,5 @@ public class FileUtils {
 
     public static File GET_OUTPUT_FILE(String id) {
         return new File(DIRECTORY + File.separator + id + File.separator + OUTPUT_CSV);
-
     }
 }

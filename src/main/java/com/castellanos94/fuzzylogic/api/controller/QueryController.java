@@ -172,6 +172,21 @@ public class QueryController {
         } else {
             return ResponseEntity.badRequest().body(new ResponseModel().setMsg("Id not found"));
         }
-
+    }
+    @RequestMapping(value = "dataset/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity downloadDataset(@PathVariable String id) throws IOException {
+        Optional<EurekaTask> task = eurekaTaskRepository.findById(id);
+        if (task.isPresent()) {
+            File file = FileUtils.GET_DATASET_FILE(id);
+            if (file.exists()) {
+                return ResponseEntity.ok()
+                        .header("Content-Disposition", "attachment; filename=" + file.getName())
+                        .contentLength(file.length())
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .body(new FileSystemResource(file));
+            }
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.badRequest().build();
     }
 }
