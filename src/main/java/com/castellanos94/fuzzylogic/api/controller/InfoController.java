@@ -1,5 +1,6 @@
 package com.castellanos94.fuzzylogic.api.controller;
 
+import com.castellanos94.fuzzylogic.api.db.EurekaTask;
 import com.castellanos94.fuzzylogic.api.db.EurekaTaskRepository;
 import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
 import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
@@ -38,9 +39,12 @@ public class InfoController {
     @RequestMapping(value = "evaluation", method = RequestMethod.GET, produces = {"application/json"})
     public ResponseEntity<Map<String, Object>> getAllPublicEvaluations(@RequestParam(defaultValue = "0") int page,
                                                                        @RequestParam(defaultValue = "3") int size) {
-        List<EvaluationQuery> queries = new ArrayList<>();
+        List<EurekaTask> queries = new ArrayList<>();
         long skipN = (long) page * size;
-        queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery && !(q.getQuery() instanceof DiscoveryQuery) && q.getQuery().isPublic()).map(q -> ((EvaluationQuery) q.getQuery())).skip(skipN).limit(size).forEachOrdered(queries::add);
+        queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery && !(q.getQuery() instanceof DiscoveryQuery) && q.getQuery().isPublic()).skip(skipN).limit(size).forEachOrdered(eurekaTask -> {
+            eurekaTask.setUserId(null);
+            eurekaTask.setStatus(null);
+        });
 
         Map<String, Object> response = new HashMap<>();
         response.put("queries", queries);
@@ -56,9 +60,12 @@ public class InfoController {
     @RequestMapping(value = "discovery", method = RequestMethod.GET, produces = {"application/json"})
     public ResponseEntity<Map<String, Object>> getAllDiscoveries(@RequestParam(defaultValue = "0") int page,
                                                                  @RequestParam(defaultValue = "3") int size) {
-        List<DiscoveryQuery> queries = new ArrayList<>();
+        List<EurekaTask> queries = new ArrayList<>();
         long skipN = (long) page * size;
-        queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof DiscoveryQuery && q.getQuery().isPublic()).map(q -> ((DiscoveryQuery) q.getQuery())).skip(skipN).limit(size).forEachOrdered(queries::add);
+        queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof DiscoveryQuery && q.getQuery().isPublic()).skip(skipN).limit(size).forEachOrdered(eurekaTask -> {
+            eurekaTask.setUserId(null);
+            eurekaTask.setStatus(null);
+        });
 
         Map<String, Object> response = new HashMap<>();
         response.put("queries", queries);
