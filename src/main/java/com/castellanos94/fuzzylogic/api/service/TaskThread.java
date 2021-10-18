@@ -108,6 +108,9 @@ public class TaskThread implements Runnable {
             }
         }
         repository.save(task);
+        if(!task.getQuery().isPublic()){
+            FileUtils.DELETE_DATASET(task.getId());
+        }
         LOGGER.info("End task:" + task.getId());
     }
 
