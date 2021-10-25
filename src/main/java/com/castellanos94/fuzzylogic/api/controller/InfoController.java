@@ -50,9 +50,10 @@ public class InfoController {
         Map<String, Object> response = new HashMap<>();
         response.put("queries", queries);
         response.put("currentPage", page);
-        response.put("totalItems", queries.size());
-        long total = queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery && !(q.getQuery() instanceof DiscoveryQuery) && q.getQuery().isPublic()).map(q -> ((EvaluationQuery) q.getQuery())).count() / size;
-        response.put("totalPages", (total < 1) ? 1 : total);
+        long total = queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery && !(q.getQuery() instanceof DiscoveryQuery) && q.getQuery().isPublic()).map(q -> ((EvaluationQuery) q.getQuery())).count() ;
+        response.put("totalItems", total);
+        long totalP = total/size;
+        response.put("totalPages", (totalP < 1) ? 1 : totalP);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -72,9 +73,11 @@ public class InfoController {
         Map<String, Object> response = new HashMap<>();
         response.put("queries", queries);
         response.put("currentPage", page);
-        response.put("totalItems", queries.size());
-        long total = queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof DiscoveryQuery && q.getQuery().isPublic()).map(q -> ((DiscoveryQuery) q.getQuery())).count() / size;
-        response.put("totalPages", (total < 1) ? 1 : total);
+
+        long total = queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof DiscoveryQuery && q.getQuery().isPublic()).map(q -> ((DiscoveryQuery) q.getQuery())).count() ;
+        response.put("totalItems", total);
+        long totalP = total/size;
+        response.put("totalPages", (totalP < 1) ? 1 : totalP);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
