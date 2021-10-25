@@ -52,7 +52,8 @@ public class InfoController {
         response.put("currentPage", page);
         long total = queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery && !(q.getQuery() instanceof DiscoveryQuery) && q.getQuery().isPublic()).map(q -> ((EvaluationQuery) q.getQuery())).count() ;
         response.put("totalItems", total);
-        long totalP = total/size;
+        long totalP = (long) Math.ceil(total/((double)size));
+
         response.put("totalPages", (totalP < 1) ? 1 : totalP);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -76,7 +77,7 @@ public class InfoController {
 
         long total = queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof DiscoveryQuery && q.getQuery().isPublic()).map(q -> ((DiscoveryQuery) q.getQuery())).count() ;
         response.put("totalItems", total);
-        long totalP = total/size;
+        long totalP = (long) Math.ceil(total/((double)size));
         response.put("totalPages", (totalP < 1) ? 1 : totalP);
 
         return new ResponseEntity<>(response, HttpStatus.OK);

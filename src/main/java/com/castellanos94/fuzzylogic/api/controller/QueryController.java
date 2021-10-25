@@ -62,7 +62,7 @@ public class QueryController {
 
         long total = eurekaTaskRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery && !(q.getQuery() instanceof DiscoveryQuery)).map(q -> ((EvaluationQuery) q.getQuery())).count() ;
         response.put("totalItems", total);
-        long totalP = total/size;
+        long totalP = (long) Math.ceil(total/((double)size));
         response.put("totalPages", (totalP < 1) ? 1 : totalP);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -129,7 +129,7 @@ public class QueryController {
         response.put("totalItems", queries.size());
         long total = eurekaTaskRepository.findAll().stream().filter(q -> q.getQuery() instanceof DiscoveryQuery).map(q -> ((DiscoveryQuery) q.getQuery())).count() ;
         response.put("totalItems", total);
-        long totalP = total/size;
+        long totalP = (long) Math.ceil(total/((double)size));
 
         response.put("totalPages", (totalP < 1) ? 1 : totalP);
 
