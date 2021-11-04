@@ -59,18 +59,12 @@ public class TaskThread implements Runnable {
             if (table != null) {
                 if (task.getQuery() instanceof EvaluationQuery && !(task.getQuery() instanceof DiscoveryQuery)) {
                     _logic = ((EvaluationQuery) task.getQuery()).getLogic().toInternalObject().build();
-                    System.out.println(((EvaluationQuery)task.getQuery()).getLogic());
-                    System.out.println( ((EvaluationQuery) task.getQuery()).getLogic().toInternalObject());
-                    EvaluatePredicate evaluatePredicate = new EvaluatePredicate(_logic, table);
                     try {
+                        EvaluatePredicate evaluatePredicate = new EvaluatePredicate(_logic, table);
                         evaluatePredicate.evaluate(predicateTree);
-                    } catch (Exception e) {
-                        LOGGER.error("Evaluation algorithm", e);
-                        task.setMsg("Failed " + new Date());
-                        task.setStatus(EurekaTask.Status.Failed);
-                    }
-                    output = FileUtils.GET_OUTPUT_FILE(task.getId());
-                    try {
+
+                        output = FileUtils.GET_OUTPUT_FILE(task.getId());
+
                         evaluatePredicate.exportToCsv(output.getAbsolutePath());
                         Table result = Table.read().csv(output);
                         StringColumn predicateColumn = StringColumn.create("data");
@@ -82,18 +76,19 @@ public class TaskThread implements Runnable {
                         result.write().csv(output);
                         task.setMsg("Done " + new Date());
                         task.setStatus(EurekaTask.Status.Done);
-                    } catch (IOException e) {
-                        LOGGER.error("Error al guardar resultados", e);
-                        task.setMsg("Error saving dataset:" + e.getMessage());
+                    } catch (Exception e) {
+                        LOGGER.error("Evaluation algorithm (or saving dataset)", e);
+                        task.setMsg("Failed " + new Date());
                         task.setStatus(EurekaTask.Status.Failed);
                     }
                 } else if (task.getQuery() instanceof DiscoveryQuery) {
-                    DiscoveryQuery discoveryQuery = (DiscoveryQuery) task.getQuery();
-                    _logic = discoveryQuery.getLogic().toInternalObject().build();
-                    KDFLC algorithm = new KDFLC(_logic, discoveryQuery.getPopulationSize(), discoveryQuery.getNumberOfIterations(),
-                            discoveryQuery.getNumberOfResults(), discoveryQuery.getMinimumTruthValue(), discoveryQuery.getMutationRate(),
-                            discoveryQuery.getAdjPopulationSize(), discoveryQuery.getAdjNumberOfIterations(), discoveryQuery.getAdjMinimumTruthValue(), table);
                     try {
+                        DiscoveryQuery discoveryQuery = (DiscoveryQuery) task.getQuery();
+                        _logic = discoveryQuery.getLogic().toInternalObject().build();
+                        KDFLC algorithm = new KDFLC(_logic, discoveryQuery.getPopulationSize(), discoveryQuery.getNumberOfIterations(),
+                                discoveryQuery.getNumberOfResults(), discoveryQuery.getMinimumTruthValue(), discoveryQuery.getMutationRate(),
+                                discoveryQuery.getAdjPopulationSize(), discoveryQuery.getAdjNumberOfIterations(), discoveryQuery.getAdjMinimumTruthValue(), table);
+
                         algorithm.execute(predicateTree);
                         output = FileUtils.GET_OUTPUT_FILE(task.getId());
                         algorithm.exportResult(output);
