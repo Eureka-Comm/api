@@ -65,7 +65,7 @@
         <dependency>
             <groupId>com.castellanos94</groupId>
             <artifactId>fuzzylogicgp-algorithm</artifactId>
-            <version>1.4.0</version>
+            <version>1.4.1</version>
         </dependency>
 
     </dependencies>
