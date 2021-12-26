@@ -78,7 +78,7 @@ public class TaskThread implements Runnable {
                         task.setStatus(EurekaTask.Status.Done);
                     } catch (Exception e) {
                         LOGGER.error("Evaluation algorithm (or saving dataset)", e);
-                        task.setMsg("Failed " + new Date());
+                        task.setMsg("Failed " + new Date()+ " "+e.getMessage());
                         task.setStatus(EurekaTask.Status.Failed);
                     }
                 } else if (task.getQuery() instanceof DiscoveryQuery) {
