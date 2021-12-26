@@ -91,12 +91,18 @@ public class TaskThread implements Runnable {
 
                         algorithm.execute(predicateTree);
                         output = FileUtils.GET_OUTPUT_FILE(task.getId());
-                        algorithm.exportResult(output);
-                        task.setMsg("Done " + new Date());
-                        task.setStatus(EurekaTask.Status.Done);
+                        try {
+                            algorithm.exportResult(output);
+                            task.setMsg("Done " + new Date());
+                            task.setStatus(EurekaTask.Status.Done);
+                        }catch (Exception e){
+                            LOGGER.error("Error trying export", e);
+                            task.setMsg("Error during export of results" + new Date()+ " "+ e.getMessage());
+                            task.setStatus(EurekaTask.Status.Failed);
+                        }
                     } catch (Exception e) {
                         LOGGER.error("Discovery algorithm", e);
-                        task.setMsg("Failed " + new Date());
+                        task.setMsg("Failed " + new Date()+ " "+ e.getMessage());
                         task.setStatus(EurekaTask.Status.Failed);
                     }
                 }
