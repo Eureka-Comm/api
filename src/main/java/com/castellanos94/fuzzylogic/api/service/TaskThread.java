@@ -59,6 +59,7 @@ public class TaskThread implements Runnable {
             if (table != null) {
                 if (task.getQuery() instanceof EvaluationQuery && !(task.getQuery() instanceof DiscoveryQuery)) {
                     _logic = ((EvaluationQuery) task.getQuery()).getLogic().toInternalObject().build();
+                    LOGGER.error("Logic natural implication {}, {}",_logic.isNatural_implication(), _logic.getClass().getName());
                     try {
                         EvaluatePredicate evaluatePredicate = new EvaluatePredicate(_logic, table);
                         evaluatePredicate.evaluate(predicateTree);
@@ -85,6 +86,7 @@ public class TaskThread implements Runnable {
                     try {
                         DiscoveryQuery discoveryQuery = (DiscoveryQuery) task.getQuery();
                         _logic = discoveryQuery.getLogic().toInternalObject().build();
+                        LOGGER.error("Logic natural implication {}, {}",_logic.isNatural_implication(), _logic.getClass().getName());
                         KDFLC algorithm = new KDFLC(_logic, discoveryQuery.getPopulationSize(), discoveryQuery.getNumberOfIterations(),
                                 discoveryQuery.getNumberOfResults(), discoveryQuery.getMinimumTruthValue(), discoveryQuery.getMutationRate(),
                                 discoveryQuery.getAdjPopulationSize(), discoveryQuery.getAdjNumberOfIterations(), discoveryQuery.getAdjMinimumTruthValue(), table);
