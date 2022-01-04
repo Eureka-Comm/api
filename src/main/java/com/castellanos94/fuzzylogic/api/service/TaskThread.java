@@ -7,7 +7,9 @@ import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
 import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
 import com.castellanos94.fuzzylogicgp.algorithm.EvaluatePredicate;
 import com.castellanos94.fuzzylogicgp.algorithm.KDFLC;
+import com.castellanos94.fuzzylogicgp.core.Node;
 import com.castellanos94.fuzzylogicgp.core.NodeTree;
+import com.castellanos94.fuzzylogicgp.core.NodeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import tech.tablesaw.api.Table;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 
 @Component
@@ -59,11 +62,50 @@ public class TaskThread implements Runnable {
             if (table != null) {
                 if (task.getQuery() instanceof EvaluationQuery && !(task.getQuery() instanceof DiscoveryQuery)) {
                     _logic = ((EvaluationQuery) task.getQuery()).getLogic().toInternalObject().build();
-                    LOGGER.error("Logic natural implication {}, {}",_logic.isNatural_implication(), _logic.getClass().getName());
+                    LOGGER.error("Logic natural implication {}, {}", _logic.isNatural_implication(), _logic.getClass().getName());
                     try {
                         EvaluatePredicate evaluatePredicate = new EvaluatePredicate(_logic, table);
                         evaluatePredicate.evaluate(predicateTree);
-
+                        ArrayList<Node> operators = NodeTree.getNodesByType(predicateTree, NodeType.AND);
+                        for (Node node : operators) {
+                            if(node instanceof  NodeTree && !node.equals(predicateTree)) {
+                                EvaluatePredicate ep = new EvaluatePredicate(_logic, table);
+                                double evaluate = ep.evaluate((NodeTree) node);
+                                ((NodeTree) node).setFitness(evaluate);
+                            }
+                        }
+                        operators= NodeTree.getNodesByType(predicateTree, NodeType.OR);
+                        for (Node node : operators) {
+                            if(node instanceof  NodeTree && !node.equals(predicateTree)) {
+                                EvaluatePredicate ep = new EvaluatePredicate(_logic, table);
+                                double evaluate = ep.evaluate((NodeTree) node);
+                                ((NodeTree) node).setFitness(evaluate);
+                            }
+                        }
+                        operators= NodeTree.getNodesByType(predicateTree, NodeType.NOT);
+                        for (Node node : operators) {
+                            if(node instanceof  NodeTree && !node.equals(predicateTree)) {
+                                EvaluatePredicate ep = new EvaluatePredicate(_logic, table);
+                                double evaluate = ep.evaluate((NodeTree) node);
+                                ((NodeTree) node).setFitness(evaluate);
+                            }
+                        }
+                        operators= NodeTree.getNodesByType(predicateTree, NodeType.IMP);
+                        for (Node node : operators) {
+                            if(node instanceof  NodeTree && !node.equals(predicateTree)) {
+                                EvaluatePredicate ep = new EvaluatePredicate(_logic, table);
+                                double evaluate = ep.evaluate((NodeTree) node);
+                                ((NodeTree) node).setFitness(evaluate);
+                            }
+                        }
+                        operators= NodeTree.getNodesByType(predicateTree, NodeType.EQV);
+                        for (Node node : operators) {
+                            if(node instanceof  NodeTree && !node.equals(predicateTree)) {
+                                EvaluatePredicate ep = new EvaluatePredicate(_logic, table);
+                                double evaluate = ep.evaluate((NodeTree) node);
+                                ((NodeTree) node).setFitness(evaluate);
+                            }
+                        }
                         output = FileUtils.GET_OUTPUT_FILE(task.getId());
 
                         evaluatePredicate.exportToCsv(output.getAbsolutePath());
@@ -79,14 +121,14 @@ public class TaskThread implements Runnable {
                         task.setStatus(EurekaTask.Status.Done);
                     } catch (Exception e) {
                         LOGGER.error("Evaluation algorithm (or saving dataset)", e);
-                        task.setMsg("Failed " + new Date()+ " "+e.getMessage());
+                        task.setMsg("Failed " + new Date() + " " + e.getMessage());
                         task.setStatus(EurekaTask.Status.Failed);
                     }
                 } else if (task.getQuery() instanceof DiscoveryQuery) {
                     try {
                         DiscoveryQuery discoveryQuery = (DiscoveryQuery) task.getQuery();
                         _logic = discoveryQuery.getLogic().toInternalObject().build();
-                        LOGGER.error("Logic natural implication {}, {}",_logic.isNatural_implication(), _logic.getClass().getName());
+                        LOGGER.error("Logic natural implication {}, {}", _logic.isNatural_implication(), _logic.getClass().getName());
                         KDFLC algorithm = new KDFLC(_logic, discoveryQuery.getPopulationSize(), discoveryQuery.getNumberOfIterations(),
                                 discoveryQuery.getNumberOfResults(), discoveryQuery.getMinimumTruthValue(), discoveryQuery.getMutationRate(),
                                 discoveryQuery.getAdjPopulationSize(), discoveryQuery.getAdjNumberOfIterations(), discoveryQuery.getAdjMinimumTruthValue(), table);
@@ -97,21 +139,21 @@ public class TaskThread implements Runnable {
                             algorithm.exportResult(output);
                             task.setMsg("Done " + new Date());
                             task.setStatus(EurekaTask.Status.Done);
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             LOGGER.error("Error trying export", e);
-                            task.setMsg("Error during export of results" + new Date()+ " "+ e.getMessage());
+                            task.setMsg("Error during export of results" + new Date() + " " + e.getMessage());
                             task.setStatus(EurekaTask.Status.Failed);
                         }
                     } catch (Exception e) {
                         LOGGER.error("Discovery algorithm", e);
-                        task.setMsg("Failed " + new Date()+ " "+ e.getMessage());
+                        task.setMsg("Failed " + new Date() + " " + e.getMessage());
                         task.setStatus(EurekaTask.Status.Failed);
                     }
                 }
             }
         }
         repository.save(task);
-        if(!task.getQuery().isPublic()){
+        if (!task.getQuery().isPublic()) {
             FileUtils.DELETE_DATASET(task.getId());
         }
         LOGGER.info("End task:" + task.getId());
