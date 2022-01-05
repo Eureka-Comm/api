@@ -51,8 +51,10 @@ public class Logic {
     public com.castellanos94.fuzzylogicgp.logic.LogicBuilder toInternalObject() {
         LogicBuilder lb = LogicBuilder.newBuilder(com.castellanos94.fuzzylogicgp.logic.LogicType.valueOf(type.name().toUpperCase()));
         lb.setExponent(exponent);
-        if (implicationType != null)
-            lb.setImplicationType(com.castellanos94.fuzzylogicgp.logic.Logic.ImplicationType.valueOf(implicationType.name().toUpperCase()));
+        if (implicationType != null){
+            lb.setImplicationType(com.castellanos94.fuzzylogicgp.logic.ImplicationType.searchEnum(implicationType.name()));
+        }
+        //lb.setImplicationType(com.castellanos94.fuzzylogicgp.logic.Logic.ImplicationType.);
         return lb;
     }
 
