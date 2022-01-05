@@ -5,21 +5,31 @@ import com.castellanos94.fuzzylogicgp.logic.LogicBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.validation.constraints.NotNull;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Logic {
     public static enum LogicType {gmbc, ambc, zadeh, acf, gmbcv}
 
+    public static enum ImplicationType {
+        Natural,
+        Zadeh,
+        Reichenbach,
+        KlirYuan,
+        Yager
+    }
+
     @NotNull
     protected LogicType type;
     protected Integer exponent;
-    protected Boolean natural_implication;
+    protected ImplicationType implicationType;
 
-    public Boolean getNatural_implication() {
-        return natural_implication;
-    }
 
     public Integer getExponent() {
         return exponent;
+    }
+
+    public ImplicationType getImplicationType() {
+        return implicationType;
     }
 
     public LogicType getType() {
@@ -34,15 +44,15 @@ public class Logic {
         this.exponent = exponent;
     }
 
-    public void setNatural_implication(Boolean natural_implication) {
-        this.natural_implication = natural_implication;
+    public void setImplicationType(ImplicationType implicationType) {
+        this.implicationType = implicationType;
     }
 
     public com.castellanos94.fuzzylogicgp.logic.LogicBuilder toInternalObject() {
         LogicBuilder lb = LogicBuilder.newBuilder(com.castellanos94.fuzzylogicgp.logic.LogicType.valueOf(type.name().toUpperCase()));
         lb.setExponent(exponent);
-        if (natural_implication != null)
-            lb.setNatural_implication(natural_implication);
+        if (implicationType != null)
+            lb.setImplicationType(com.castellanos94.fuzzylogicgp.logic.Logic.ImplicationType.valueOf(implicationType.name().toUpperCase()));
         return lb;
     }
 
@@ -51,7 +61,7 @@ public class Logic {
         return "Logic{" +
                 "type=" + type +
                 ", exponent=" + exponent +
-                ", natural_implication=" + natural_implication +
+                ", implication type=" + implicationType +
                 '}';
     }
 }
