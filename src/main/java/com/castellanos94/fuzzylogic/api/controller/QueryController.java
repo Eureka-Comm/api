@@ -6,16 +6,22 @@ import com.castellanos94.fuzzylogic.api.db.FileUtils;
 import com.castellanos94.fuzzylogic.api.model.ResponseModel;
 import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
 import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
+import com.castellanos94.fuzzylogic.api.security.jwt.JwtUtils;
+import com.castellanos94.fuzzylogic.api.security.services.UserDetailsImpl;
 import com.castellanos94.fuzzylogic.api.service.AsynchronousService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +42,8 @@ import java.util.*;
 )
 
 public class QueryController {
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+
     @Autowired
     EurekaTaskRepository eurekaTaskRepository;
     @Autowired
@@ -63,6 +71,7 @@ public class QueryController {
     @RequestMapping(value = "evaluation", method = RequestMethod.GET, produces = {"application/json"})
     public ResponseEntity<Map<String, Object>> getEvaluations(@RequestParam(defaultValue = "0") int page,
                                                               @RequestParam(defaultValue = "3") int size) {
+        getUserId();
         List<EvaluationQuery> queries = new ArrayList<>();
         long skipN = (long) page * size;
         eurekaTaskRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery && !(q.getQuery() instanceof DiscoveryQuery)).map(q -> ((EvaluationQuery) q.getQuery())).skip(skipN).limit(size).forEachOrdered(queries::add);
@@ -77,6 +86,12 @@ public class QueryController {
         response.put("totalPages", (totalP < 1) ? 1 : totalP);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    private String getUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return userDetails.getId();
     }
 
     @Operation(security = {@SecurityRequirement(name = "ApiKey")})
@@ -95,9 +110,9 @@ public class QueryController {
             responseModel.setMsg("The following linguistic states have no membership function: " + msg);
             return ResponseEntity.badRequest().body(responseModel);
         }
-        System.out.println("Save in repository...");
+        logger.info("Save in repository...");
 
-        EurekaTask save = eurekaTaskRepository.save(new EurekaTask().setQuery(evaluationQuery));
+        EurekaTask save = eurekaTaskRepository.save(new EurekaTask().setQuery(evaluationQuery).setUserId(getUserId()));
         return ResponseEntity.ok(responseModel.setStatus(save.getStatus()).setId(save.getId()));
     }
 
@@ -122,9 +137,9 @@ public class QueryController {
             }
         }
 
-        System.out.println("Save in repository...");
+        logger.info("Save in repository...");
 
-        EurekaTask save = eurekaTaskRepository.save(new EurekaTask().setQuery(discoveryQuery));
+        EurekaTask save = eurekaTaskRepository.save(new EurekaTask().setQuery(discoveryQuery).setUserId(getUserId()));
 
         return ResponseEntity.ok(responseModel.setStatus(save.getStatus()).setId(save.getId()));
     }
