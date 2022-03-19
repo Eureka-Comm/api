@@ -35,7 +35,6 @@ public class TaskThread implements Runnable {
         this.task = task;
     }
 
-
     @Override
     public void run() {
         LOGGER.info("Start task:" + task.getId());
@@ -68,39 +67,39 @@ public class TaskThread implements Runnable {
                         evaluatePredicate.evaluate(predicateTree);
                         ArrayList<Node> operators = NodeTree.getNodesByType(predicateTree, NodeType.AND);
                         for (Node node : operators) {
-                            if(node instanceof  NodeTree && !node.equals(predicateTree)) {
+                            if (node instanceof NodeTree && !node.equals(predicateTree)) {
                                 EvaluatePredicate ep = new EvaluatePredicate(_logic, table);
                                 double evaluate = ep.evaluate((NodeTree) node);
                                 ((NodeTree) node).setFitness(evaluate);
                             }
                         }
-                        operators= NodeTree.getNodesByType(predicateTree, NodeType.OR);
+                        operators = NodeTree.getNodesByType(predicateTree, NodeType.OR);
                         for (Node node : operators) {
-                            if(node instanceof  NodeTree && !node.equals(predicateTree)) {
+                            if (node instanceof NodeTree && !node.equals(predicateTree)) {
                                 EvaluatePredicate ep = new EvaluatePredicate(_logic, table);
                                 double evaluate = ep.evaluate((NodeTree) node);
                                 ((NodeTree) node).setFitness(evaluate);
                             }
                         }
-                        operators= NodeTree.getNodesByType(predicateTree, NodeType.NOT);
+                        operators = NodeTree.getNodesByType(predicateTree, NodeType.NOT);
                         for (Node node : operators) {
-                            if(node instanceof  NodeTree && !node.equals(predicateTree)) {
+                            if (node instanceof NodeTree && !node.equals(predicateTree)) {
                                 EvaluatePredicate ep = new EvaluatePredicate(_logic, table);
                                 double evaluate = ep.evaluate((NodeTree) node);
                                 ((NodeTree) node).setFitness(evaluate);
                             }
                         }
-                        operators= NodeTree.getNodesByType(predicateTree, NodeType.IMP);
+                        operators = NodeTree.getNodesByType(predicateTree, NodeType.IMP);
                         for (Node node : operators) {
-                            if(node instanceof  NodeTree && !node.equals(predicateTree)) {
+                            if (node instanceof NodeTree && !node.equals(predicateTree)) {
                                 EvaluatePredicate ep = new EvaluatePredicate(_logic, table);
                                 double evaluate = ep.evaluate((NodeTree) node);
                                 ((NodeTree) node).setFitness(evaluate);
                             }
                         }
-                        operators= NodeTree.getNodesByType(predicateTree, NodeType.EQV);
+                        operators = NodeTree.getNodesByType(predicateTree, NodeType.EQV);
                         for (Node node : operators) {
-                            if(node instanceof  NodeTree && !node.equals(predicateTree)) {
+                            if (node instanceof NodeTree && !node.equals(predicateTree)) {
                                 EvaluatePredicate ep = new EvaluatePredicate(_logic, table);
                                 double evaluate = ep.evaluate((NodeTree) node);
                                 ((NodeTree) node).setFitness(evaluate);
@@ -151,6 +150,10 @@ public class TaskThread implements Runnable {
                     }
                 }
             }
+        } else {
+            LOGGER.error("Invalid input " + task.getId());
+            task.setMsg("Invalid predicate " + new Date());
+            task.setStatus(EurekaTask.Status.Failed);
         }
         repository.save(task);
         if (!task.getQuery().isPublic()) {
@@ -158,6 +161,5 @@ public class TaskThread implements Runnable {
         }
         LOGGER.info("End task:" + task.getId());
     }
-
 
 }
