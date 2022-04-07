@@ -56,11 +56,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests().antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/api/test/**").permitAll()
-                .antMatchers("/swagger-ui/**").permitAll()
-                .antMatchers("/v3/**").permitAll()
-                .antMatchers("/public/**").permitAll()
-                .anyRequest().authenticated();
+                //.antMatchers("/api/test/**").permitAll()
+                //.antMatchers("/swagger-ui/**").permitAll()
+                //.antMatchers("/v3/**").permitAll()
+                //.antMatchers("/public/**").permitAll()
+                .anyRequest().permitAll();
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 }

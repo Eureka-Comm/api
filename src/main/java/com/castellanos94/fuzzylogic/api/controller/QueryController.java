@@ -90,8 +90,15 @@ public class QueryController {
 
     private String getUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        return userDetails.getId();
+        if(authentication!=null) {
+            if(authentication.getPrincipal() instanceof UserDetailsImpl) {
+                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+                return userDetails.getId();
+            }else if(authentication.getPrincipal() instanceof String){
+                logger.error("anonymous user {}",authentication.getPrincipal());
+            }
+        }
+        return null;
     }
 
     @Operation(security = {@SecurityRequirement(name = "ApiKey")})
