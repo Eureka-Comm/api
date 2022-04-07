@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 public class EurekaTask {
     public enum Status {Done, Running, Failed, Created}
-
+    //TODO: usar ObjectID y agregar serializador para el valor
     @Id
     protected String id;
     protected Status status;

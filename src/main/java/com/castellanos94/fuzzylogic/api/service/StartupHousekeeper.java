@@ -24,9 +24,11 @@ public class StartupHousekeeper {
         AtomicLong count = new AtomicLong(0);
         eurekaTaskRepository.findAll().stream().filter(eurekaTask ->
             eurekaTask.getStatus() == EurekaTask.Status.Created || eurekaTask.getStatus() == EurekaTask.Status.Running).forEach(eurekaTask -> {
-                service.executeAsynchronously(eurekaTask);
+                //service.executeAsynchronously(eurekaTask);
+                eurekaTask.setStatus(EurekaTask.Status.Failed);
+                eurekaTaskRepository.save(eurekaTask);
                 count.incrementAndGet();
         });
-        logger.info("Running tasks {}", count.get());
+        logger.info("Failed tasks {}", count.get());
     }
 }
