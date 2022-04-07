@@ -122,6 +122,7 @@ public class TaskThread implements Runnable {
                     } catch (Exception e) {
                         LOGGER.error("Evaluation algorithm (or saving dataset)", e);
                         task.setMsg("Failed " + new Date() + " " + e.getMessage());
+//			e.printStackTrace();
                         task.setStatus(EurekaTask.Status.Failed);
                     }
                 } else if (task.getQuery() instanceof DiscoveryQuery) {
@@ -151,6 +152,10 @@ public class TaskThread implements Runnable {
                     }
                 }
             }
+        }else{
+            LOGGER.error("Invalid input "+task.getId());
+            task.setMsg("Invalid predicate " + new Date());
+            task.setStatus(EurekaTask.Status.Failed);
         }
         repository.save(task);
         if (!task.getQuery().isPublic()) {
