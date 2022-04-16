@@ -151,7 +151,7 @@ public class TaskThread implements Runnable {
                     }
                 }
             }
-        }else{
+        } else {
             LOGGER.error("Invalid input " + task.getId());
             task.setMsg("Invalid predicate " + new Date());
             task.setStatus(EurekaTask.Status.Failed);
@@ -161,6 +161,17 @@ public class TaskThread implements Runnable {
             FileUtils.DELETE_DATASET(task.getId());
         }
         LOGGER.info("End task:" + task.getId());
-   }
+    }
+
+    public EurekaTask getTask() {
+        return task;
+    }
+
+    public void stop() {
+        // TODO: invocar a detener algoritmo y guardar en base de datos
+        // Posible escenario: que se detenga sin guardar estado Status.Stopped Status.Running
+        // Guardar estado Status.Pause ? -> Status.Running
+        // Solo guardar los resultados y exportar Status.Done -> Terminal
+    }
 }
 
