@@ -2,11 +2,15 @@ package com.castellanos94.fuzzylogic.api.model;
 
 import com.castellanos94.fuzzylogic.api.db.EurekaTask;
 
+import java.util.ArrayList;
+
 public class ResponseModel {
 
     private String msg = "";
     private EurekaTask.Status status;
     private String id = "";
+
+    private ArrayList<String> log;
 
     public String getMsg() {
         return msg;
@@ -33,6 +37,14 @@ public class ResponseModel {
     public ResponseModel setId(String id) {
         this.id = id;
         return this;
+    }
+
+    public ArrayList<String> getLog() {
+        return log;
+    }
+
+    public void setLog(ArrayList<String> log) {
+        this.log = log;
     }
 
     @Override

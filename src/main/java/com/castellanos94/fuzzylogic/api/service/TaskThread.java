@@ -35,6 +35,8 @@ public class TaskThread implements Runnable {
         this.task = task;
     }
 
+    private KDFLC algorithm;
+
     @Override
     public void run() {
         LOGGER.info("Start task:" + task.getId());
@@ -65,7 +67,7 @@ public class TaskThread implements Runnable {
                     try {
                         EvaluatePredicate evaluatePredicate = new EvaluatePredicate(_logic, table);
                         evaluatePredicate.evaluate(predicateTree);
-                        ArrayList<Node> operators = NodeTree.getNodesByType(predicateTree, NodeType.AND);
+                       /* ArrayList<Node> operators = NodeTree.getNodesByType(predicateTree, NodeType.AND);
                         for (Node node : operators) {
                             if (node instanceof NodeTree && !node.equals(predicateTree)) {
                                 EvaluatePredicate ep = new EvaluatePredicate(_logic, table);
@@ -104,7 +106,7 @@ public class TaskThread implements Runnable {
                                 double evaluate = ep.evaluate((NodeTree) node);
                                 ((NodeTree) node).setFitness(evaluate);
                             }
-                        }
+                        }*/
                         output = FileUtils.GET_OUTPUT_FILE(task.getId());
 
                         evaluatePredicate.exportToCsv(output.getAbsolutePath());
@@ -129,9 +131,9 @@ public class TaskThread implements Runnable {
                         DiscoveryQuery discoveryQuery = (DiscoveryQuery) task.getQuery();
                         _logic = discoveryQuery.getLogic().toInternalObject().build();
                         LOGGER.error("Logic {}", _logic);
-                        KDFLC algorithm = new KDFLC(_logic, discoveryQuery.getPopulationSize(), discoveryQuery.getNumberOfIterations(),
+                        algorithm = new KDFLC(_logic, discoveryQuery.getPopulationSize(), discoveryQuery.getNumberOfIterations(),
                                 discoveryQuery.getNumberOfResults(), discoveryQuery.getMinimumTruthValue(), discoveryQuery.getMutationRate(),
-                                discoveryQuery.getAdjPopulationSize(), discoveryQuery.getAdjNumberOfIterations(), discoveryQuery.getAdjMinimumTruthValue(), table);
+                                discoveryQuery.getAdjPopulationSize(), discoveryQuery.getAdjNumberOfIterations(), discoveryQuery.getAdjMinimumTruthValue(), table, discoveryQuery.getMaxTime());
 
                         algorithm.execute(predicateTree);
                         output = FileUtils.GET_OUTPUT_FILE(task.getId());
@@ -172,6 +174,12 @@ public class TaskThread implements Runnable {
         // Posible escenario: que se detenga sin guardar estado Status.Stopped Status.Running
         // Guardar estado Status.Pause ? -> Status.Running
         // Solo guardar los resultados y exportar Status.Done -> Terminal
+    }
+
+    public ArrayList<String> getLog() {
+        if (algorithm != null)
+            return algorithm.getLogList();
+        return null;
     }
 }
 

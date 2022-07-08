@@ -23,8 +23,7 @@ public class DiscoveryQuery extends EvaluationQuery {
     @NotNull
     @Min(value = 1)
     protected int numberOfResults;
-    @NotNull
-    @Min(value = 1)
+
     protected int numberOfIterations;
     @NotNull
     @Range(min = 0, max = 1)
@@ -42,7 +41,9 @@ public class DiscoveryQuery extends EvaluationQuery {
     @Range(min = 0, max = 1)
     protected float adjMinimumTruthValue;
     protected Set<Generator> generators;
-
+    @NotNull
+    @Range(min = 1000, max = 21600000)
+    protected long maxTime;
 
     /**
      * Retorna un predicado en la estructura interna segun la tarea de descubrimiento
@@ -141,6 +142,14 @@ public class DiscoveryQuery extends EvaluationQuery {
         this.generators = generators;
     }
 
+    public long getMaxTime() {
+        return maxTime;
+    }
+
+    public void setMaxTime(long maxTime) {
+        this.maxTime = maxTime;
+    }
+
     @Override
     public String toString() {
         return "DiscoveryQuery{" +
@@ -160,6 +169,7 @@ public class DiscoveryQuery extends EvaluationQuery {
                 ", states=" + states +
                 ", logic=" + logic +
                 ", predicate='" + predicate + '\'' +
+                ", maxTime='" + maxTime + '\'' +
                 '}';
     }
 }

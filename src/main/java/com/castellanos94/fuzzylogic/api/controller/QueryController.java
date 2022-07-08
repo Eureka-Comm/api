@@ -62,7 +62,11 @@ public class QueryController {
         Optional<EurekaTask> optionalEurekaTask = eurekaTaskRepository.findById(id);
         if (optionalEurekaTask.isPresent()) {
             EurekaTask task = optionalEurekaTask.get();
-            return ResponseEntity.ok(new ResponseModel().setStatus(task.getStatus()).setMsg(task.getMsg()).setId(task.getId()));
+            ResponseModel model = new ResponseModel().setStatus(task.getStatus()).setMsg(task.getMsg()).setId(task.getId());
+            if(task.getQuery() instanceof  DiscoveryQuery && task.getStatus() == EurekaTask.Status.Running){
+                model.setLog(service.getLog(task));
+            }
+            return ResponseEntity.ok(model);
         }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
