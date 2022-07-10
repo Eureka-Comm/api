@@ -8,6 +8,9 @@ import com.castellanos94.fuzzylogic.api.service.AsynchronousService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,9 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -39,22 +40,16 @@ public class InfoController {
     @RequestMapping(value = "evaluation", method = RequestMethod.GET, produces = {"application/json"})
     public ResponseEntity<Map<String, Object>> getAllPublicEvaluations(@RequestParam(defaultValue = "0") int page,
                                                                        @RequestParam(defaultValue = "3") int size) {
-        List<EurekaTask> queries = new ArrayList<>();
-        long skipN = (long) page * size;
-        queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery && !(q.getQuery() instanceof DiscoveryQuery) && q.getQuery().isPublic()).skip(skipN).limit(size).forEachOrdered(eurekaTask -> {
-            eurekaTask.setUserId(null);
-            eurekaTask.setStatus(null);
-            queries.add(eurekaTask);
-        });
+        Pageable paging = PageRequest.of(page, size);
+
+        Page<EurekaTask> queryPage = queryRepository.findPublicByTaskType(EvaluationQuery.class.getName(), paging);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("queries", queries);
-        response.put("currentPage", page);
-        long total = queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof EvaluationQuery && !(q.getQuery() instanceof DiscoveryQuery) && q.getQuery().isPublic()).map(q -> ((EvaluationQuery) q.getQuery())).count() ;
-        response.put("totalItems", total);
-        long totalP = (long) Math.ceil(total/((double)size));
+        response.put("queries", queryPage.getContent());
+        response.put("currentPage", queryPage.getNumber());
+        response.put("totalItems", queryPage.getTotalElements());
+        response.put("totalPages", queryPage.getTotalPages());
 
-        response.put("totalPages", (totalP < 1) ? 1 : totalP);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -63,22 +58,16 @@ public class InfoController {
     @RequestMapping(value = "discovery", method = RequestMethod.GET, produces = {"application/json"})
     public ResponseEntity<Map<String, Object>> getAllDiscoveries(@RequestParam(defaultValue = "0") int page,
                                                                  @RequestParam(defaultValue = "3") int size) {
-        List<EurekaTask> queries = new ArrayList<>();
-        long skipN = (long) page * size;
-        queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof DiscoveryQuery && q.getQuery().isPublic()).skip(skipN).limit(size).forEachOrdered(eurekaTask -> {
-            eurekaTask.setUserId(null);
-            eurekaTask.setStatus(null);
-            queries.add(eurekaTask);
-        });
+        Pageable paging = PageRequest.of(page, size);
+
+        Page<EurekaTask> queryPage = queryRepository.findPublicByTaskType(DiscoveryQuery.class.getName(), paging);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("queries", queries);
-        response.put("currentPage", page);
+        response.put("queries", queryPage.getContent());
+        response.put("currentPage", queryPage.getNumber());
+        response.put("totalItems", queryPage.getTotalElements());
+        response.put("totalPages", queryPage.getTotalPages());
 
-        long total = queryRepository.findAll().stream().filter(q -> q.getQuery() instanceof DiscoveryQuery && q.getQuery().isPublic()).map(q -> ((DiscoveryQuery) q.getQuery())).count() ;
-        response.put("totalItems", total);
-        long totalP = (long) Math.ceil(total/((double)size));
-        response.put("totalPages", (totalP < 1) ? 1 : totalP);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
