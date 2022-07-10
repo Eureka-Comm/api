@@ -3,6 +3,7 @@ package com.castellanos94.fuzzylogic.api.model.impl;
 import com.castellanos94.fuzzylogic.api.model.Logic;
 import com.castellanos94.fuzzylogic.api.model.Query;
 import com.castellanos94.fuzzylogicgp.core.StateNode;
+import com.castellanos94.fuzzylogicgp.core.TaskType;
 import com.castellanos94.fuzzylogicgp.parser.ParserPredicate;
 
 import javax.validation.constraints.NotBlank;
@@ -12,6 +13,9 @@ import java.util.ArrayList;
 import java.util.Set;
 
 public class EvaluationQuery extends Query {
+    public EvaluationQuery() {
+        this.job = TaskType.EVALUATION;
+    }
 
     protected String description;
 

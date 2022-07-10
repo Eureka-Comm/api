@@ -2,7 +2,10 @@ package com.castellanos94.fuzzylogic.api.model.impl;
 
 import com.castellanos94.fuzzylogicgp.core.DummyGenerator;
 import com.castellanos94.fuzzylogicgp.core.NodeTree;
+import com.castellanos94.fuzzylogicgp.core.TaskType;
 import com.castellanos94.fuzzylogicgp.parser.ParserPredicate;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,10 +18,9 @@ import java.util.stream.Collectors;
 @Document(collection = "queries")
 
 public class DiscoveryQuery extends EvaluationQuery {
-
-
     @NotNull
     @Min(value = 1)
+    @JsonProperty(required = true)
     protected int populationSize;
     @NotNull
     @Min(value = 1)
@@ -43,7 +45,12 @@ public class DiscoveryQuery extends EvaluationQuery {
     protected Set<Generator> generators;
     @NotNull
     @Range(min = 1000, max = 21600000)
+    @JsonProperty(required = true)
     protected long maxTime;
+
+    public DiscoveryQuery(){
+        this.job = TaskType.DISCOVERY;
+    }
 
     /**
      * Retorna un predicado en la estructura interna segun la tarea de descubrimiento
