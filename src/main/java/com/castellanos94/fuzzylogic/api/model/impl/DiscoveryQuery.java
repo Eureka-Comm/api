@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Document(collection = "queries")
-
 public class DiscoveryQuery extends EvaluationQuery {
     @NotNull
     @Min(value = 1)
