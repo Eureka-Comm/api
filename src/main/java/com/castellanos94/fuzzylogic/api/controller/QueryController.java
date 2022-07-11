@@ -3,6 +3,7 @@ package com.castellanos94.fuzzylogic.api.controller;
 import com.castellanos94.fuzzylogic.api.db.EurekaTask;
 import com.castellanos94.fuzzylogic.api.db.EurekaTaskRepository;
 import com.castellanos94.fuzzylogic.api.db.FileUtils;
+import com.castellanos94.fuzzylogic.api.db.ResultTaskUtils;
 import com.castellanos94.fuzzylogic.api.model.Query;
 import com.castellanos94.fuzzylogic.api.model.ResponseModel;
 import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
@@ -10,6 +11,7 @@ import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
 import com.castellanos94.fuzzylogic.api.security.jwt.JwtUtils;
 import com.castellanos94.fuzzylogic.api.security.services.UserDetailsImpl;
 import com.castellanos94.fuzzylogic.api.service.AsynchronousService;
+import com.castellanos94.fuzzylogicgp.core.ResultTask;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -30,6 +32,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -238,17 +241,31 @@ public class QueryController {
     }
 
     @Operation(security = {@SecurityRequirement(name = "ApiKey")})
-    @RequestMapping(value = "result/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity dowloadResult(@PathVariable String id) throws IOException {
-        Optional<EurekaTask> task = eurekaTaskRepository.findById(id);
+    @RequestMapping(value = "result/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity downloadResult(@PathVariable String id, HttpServletRequest request) throws IOException {
+        Optional<EurekaTask> task = eurekaTaskRepository.findResultTaskById(id);
         if (task.isPresent()) {
-            File file = FileUtils.GET_OUTPUT_FILE(id);
-            if (file.exists()) {
-                return ResponseEntity.ok()
-                        .header("Content-Disposition", "attachment; filename=" + file.getName())
-                        .contentLength(file.length())
-                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                        .body(new FileSystemResource(file));
+            EurekaTask t = task.get();
+            ResultTask resultTask = t.getResultTask();
+            String contentMediaType = request.getHeader("accept");
+            if (contentMediaType.equalsIgnoreCase(MediaType.APPLICATION_OCTET_STREAM_VALUE)) {
+                File file = FileUtils.GET_OUTPUT_FILE(t.getId());
+                if (resultTask != null)
+                    ResultTaskUtils.export(file, resultTask);
+                if (file.exists()) {
+                    return ResponseEntity.ok()
+                            .header("Content-Disposition", "attachment; filename=" + file.getName())
+                            .contentLength(file.length())
+                            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                            .body(new FileSystemResource(file));
+                }
+            } else if (contentMediaType.equalsIgnoreCase(MediaType.APPLICATION_JSON_VALUE)) {
+                if (resultTask != null)
+                    return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(resultTask);
+                else
+                    return ResponseEntity.noContent().build();
+            } else {
+                return ResponseEntity.badRequest().body("Unsupported content-type");
             }
             return ResponseEntity.noContent().build();
         }
@@ -284,7 +301,7 @@ public class QueryController {
 
     @Operation(security = {@SecurityRequirement(name = "ApiKey")})
     @RequestMapping(value = "dataset/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity downloadDataset(@PathVariable String id) throws IOException {
+    public ResponseEntity downloadDataset(@PathVariable String id) {
         Optional<EurekaTask> task = eurekaTaskRepository.findById(id);
         if (task.isPresent()) {
             File file = FileUtils.GET_DATASET_FILE(id);

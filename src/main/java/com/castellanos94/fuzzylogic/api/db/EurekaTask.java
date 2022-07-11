@@ -111,6 +111,10 @@ public class EurekaTask {
                 ", status=" + status +
                 ", query=" + query +
                 ", userId='" + userId + '\'' +
+                ", msg='" + msg + '\'' +
+                ", start=" + start +
+                ", end=" + end +
+                ", resultTask=" + resultTask +
                 '}';
     }
 }
