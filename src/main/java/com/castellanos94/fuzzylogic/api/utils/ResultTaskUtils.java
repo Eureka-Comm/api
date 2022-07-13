@@ -84,6 +84,7 @@ public class ResultTaskUtils {
         for (int i = 1; i < rs.size(); i++) {
             fa.append("");
             ex.append("");
+            data.append("");
         }
         if (resultTask.getExtend() != null && !resultTask.getExtend().isEmpty()) {
             resultTask.getExtend().forEach((k, v) -> {
