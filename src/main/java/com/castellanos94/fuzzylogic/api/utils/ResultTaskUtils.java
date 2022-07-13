@@ -1,4 +1,4 @@
-package com.castellanos94.fuzzylogic.api.db;
+package com.castellanos94.fuzzylogic.api.utils;
 
 import com.castellanos94.fuzzylogicgp.core.DiscoveryResult;
 import com.castellanos94.fuzzylogicgp.core.EvaluationResult;
@@ -34,6 +34,25 @@ public class ResultTaskUtils {
 
     private static Table discoveryResultToFile(DiscoveryResult resultTask) {
         Table table = Table.create();
+
+
+        ArrayList<Double> v = new ArrayList<>();
+        ArrayList<String> p = new ArrayList<>();
+        ArrayList<String> d = new ArrayList<>();
+        List<DiscoveryResult.Record> records = resultTask.getValues();
+        for (DiscoveryResult.Record record : records) {
+            v.add(record.getFitness());
+            p.add(record.getExpression());
+            d.add(record.getData());
+        }
+        DoubleColumn value = DoubleColumn.create("truth-value", v);
+        StringColumn predicates = StringColumn.create("predicate", p);
+        StringColumn data = StringColumn.create("data", d);
+        table.addColumns(value, predicates, data);
+        return table;
+    }
+
+    private static Gson getGson() {
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(MembershipFunction.class, new MembershipFunctionSerializer());
         // builder.excludeFieldsWithoutExposeAnnotation();
@@ -50,24 +69,7 @@ public class ResultTaskUtils {
             }
 
         });
-        Gson gson = builder.create();
-
-        ArrayList<Double> v = new ArrayList<>();
-        ArrayList<String> p = new ArrayList<>();
-        ArrayList<String> d = new ArrayList<>();
-        List<DiscoveryResult.Record> records = resultTask.getValues();
-        for (DiscoveryResult.Record record : records) {
-            v.add(record.getFitness());
-            p.add(record.getExpression());
-            NodeTree nodeTree = record.getData();
-            nodeTree.setEditable(false);
-            d.add(gson.toJson(nodeTree));
-        }
-        DoubleColumn value = DoubleColumn.create("truth-value", v);
-        StringColumn predicates = StringColumn.create("predicate", p);
-        StringColumn data = StringColumn.create("data", d);
-        table.addColumns(value, predicates, data);
-        return table;
+        return  builder.create();
     }
 
     private static Table evaluationResultToFile(EvaluationResult resultTask) {
@@ -77,6 +79,8 @@ public class ResultTaskUtils {
         StringColumn ex = StringColumn.create("Exist");
         ex.append("" + resultTask.getExists());
         DoubleColumn rs = DoubleColumn.create("Result", resultTask.getResult());
+        StringColumn data = StringColumn.create("data");
+        data.append(resultTask.getPredicate());
         for (int i = 1; i < rs.size(); i++) {
             fa.append("");
             ex.append("");
@@ -86,7 +90,7 @@ public class ResultTaskUtils {
                 table.addColumns(DoubleColumn.create(k, v));
             });
         }
-        table.addColumns(fa, ex, rs);
+        table.addColumns(fa, ex, rs,data);
         return table;
     }
 }

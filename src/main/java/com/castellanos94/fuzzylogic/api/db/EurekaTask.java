@@ -1,7 +1,6 @@
 package com.castellanos94.fuzzylogic.api.db;
 
 import com.castellanos94.fuzzylogic.api.model.Query;
-import com.castellanos94.fuzzylogicgp.core.ResultTask;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,7 +12,6 @@ import java.util.Date;
 
 public class EurekaTask {
     public enum Status {Done, Running, Failed, Created}
-    //TODO: usar ObjectID y agregar serializador para el valor
     @Id
     protected String id;
     protected Status status;
@@ -26,8 +24,6 @@ public class EurekaTask {
 
     protected  Date end;
 
-    protected ResultTask resultTask;
-
     public Date getEnd() {
         return end;
     }
@@ -36,19 +32,12 @@ public class EurekaTask {
         return start;
     }
 
-    public ResultTask getResultTask() {
-        return resultTask;
-    }
 
     public EurekaTask setEnd(Date end) {
         this.end = end;
         return this;
     }
 
-    public EurekaTask setResultTask(ResultTask resultTask) {
-        this.resultTask = resultTask;
-        return this;
-    }
 
     public EurekaTask setStart(Date start) {
         this.start = start;
@@ -114,7 +103,6 @@ public class EurekaTask {
                 ", msg='" + msg + '\'' +
                 ", start=" + start +
                 ", end=" + end +
-                ", resultTask=" + resultTask +
                 '}';
     }
 }

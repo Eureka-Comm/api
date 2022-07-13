@@ -45,6 +45,14 @@ public abstract class Query {
     @NotBlank
     protected String predicate;
 
+    public TaskType getJob() {
+        return job;
+    }
+
+    public void setJob(TaskType job) {
+        this.job = job;
+    }
+
     public void setPublic(boolean aPublic) {
         isPublic = aPublic;
     }

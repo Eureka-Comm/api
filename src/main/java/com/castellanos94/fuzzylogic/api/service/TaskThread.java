@@ -1,10 +1,9 @@
 package com.castellanos94.fuzzylogic.api.service;
 
-import com.castellanos94.fuzzylogic.api.db.EurekaTask;
-import com.castellanos94.fuzzylogic.api.db.EurekaTaskRepository;
-import com.castellanos94.fuzzylogic.api.db.FileUtils;
+import com.castellanos94.fuzzylogic.api.db.*;
 import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
 import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
+import com.castellanos94.fuzzylogic.api.utils.FileUtils;
 import com.castellanos94.fuzzylogicgp.algorithm.EvaluatePredicate;
 import com.castellanos94.fuzzylogicgp.algorithm.KDFLC;
 import com.castellanos94.fuzzylogicgp.core.DiscoveryResult;
@@ -29,6 +28,9 @@ public class TaskThread implements Runnable {
     private final EurekaTask task;
     @Autowired
     EurekaTaskRepository repository;
+
+    @Autowired
+    ResultWrapperRepository resultRepository;
 
     public TaskThread(EurekaTask task) {
         this.task = task;
@@ -60,6 +62,10 @@ public class TaskThread implements Runnable {
                 task.setStatus(EurekaTask.Status.Failed);
             }
             if (table != null) {
+                ResultWrapper results = new ResultWrapper();
+                results.setTaskId(task.getId());
+                results.setJob(task.getQuery().getJob());
+
                 if (task.getQuery() instanceof EvaluationQuery && !(task.getQuery() instanceof DiscoveryQuery)) {
                     _logic = task.getQuery().getLogic().toInternalObject().build();
                     LOGGER.error("Logic {}", _logic);
@@ -69,11 +75,14 @@ public class TaskThread implements Runnable {
                         ArrayList<NodeTree> operators = NodeTree.getNodesByType(predicateTree, NodeTree.class);
                         EvaluationResult evaluationResult = (EvaluationResult) evaluatePredicate.getResult();
                         for (NodeTree op : operators) {
-                            evaluatePredicate = new EvaluatePredicate(_logic, table);
-                            op.setFitness(evaluatePredicate.evaluate(op.copy()));
+                            EvaluatePredicate evaluatePredicate2 = new EvaluatePredicate(_logic, table);
+                            op.setFitness(evaluatePredicate2.evaluate(op.copy()));
                         }
-                        evaluationResult.setPredicate(predicateTree);
-                        task.setResultTask(evaluationResult);
+                        evaluationResult.setPredicate(predicateTree.toJson());
+
+                        results.setResult(evaluationResult);
+                        resultRepository.save(results);
+
                         task.setMsg("Done " + new Date());
                         task.setStatus(EurekaTask.Status.Done);
                     } catch (Exception e) {
@@ -92,7 +101,10 @@ public class TaskThread implements Runnable {
 
                         algorithm.execute(predicateTree);
                         DiscoveryResult discoveryResult = (DiscoveryResult) algorithm.getResult();
-                        task.setResultTask(discoveryResult);
+
+                        results.setResult(discoveryResult);
+                        resultRepository.save(results);
+
                         task.setMsg("Done " + new Date());
                         task.setStatus(EurekaTask.Status.Done);
                     } catch (Exception e) {

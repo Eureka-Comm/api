@@ -1,9 +1,6 @@
 package com.castellanos94.fuzzylogic.api.controller;
 
-import com.castellanos94.fuzzylogic.api.db.EurekaTask;
-import com.castellanos94.fuzzylogic.api.db.EurekaTaskRepository;
-import com.castellanos94.fuzzylogic.api.db.FileUtils;
-import com.castellanos94.fuzzylogic.api.db.ResultTaskUtils;
+import com.castellanos94.fuzzylogic.api.db.*;
 import com.castellanos94.fuzzylogic.api.model.Query;
 import com.castellanos94.fuzzylogic.api.model.ResponseModel;
 import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
@@ -11,6 +8,8 @@ import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
 import com.castellanos94.fuzzylogic.api.security.jwt.JwtUtils;
 import com.castellanos94.fuzzylogic.api.security.services.UserDetailsImpl;
 import com.castellanos94.fuzzylogic.api.service.AsynchronousService;
+import com.castellanos94.fuzzylogic.api.utils.FileUtils;
+import com.castellanos94.fuzzylogic.api.utils.ResultTaskUtils;
 import com.castellanos94.fuzzylogicgp.core.ResultTask;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -53,6 +52,9 @@ public class QueryController {
 
     @Autowired
     EurekaTaskRepository eurekaTaskRepository;
+
+    @Autowired
+    ResultWrapperRepository resultWrapperRepository;
     @Autowired
     AsynchronousService service;
 
@@ -243,30 +245,36 @@ public class QueryController {
     @Operation(security = {@SecurityRequirement(name = "ApiKey")})
     @RequestMapping(value = "result/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity downloadResult(@PathVariable String id, HttpServletRequest request) throws IOException {
-        Optional<EurekaTask> task = eurekaTaskRepository.findResultTaskById(id);
+        Optional<EurekaTask> task = eurekaTaskRepository.findById(id);
+        ResultTask resultTask = null;
         if (task.isPresent()) {
             EurekaTask t = task.get();
-            ResultTask resultTask = t.getResultTask();
-            String contentMediaType = request.getHeader("accept");
-            if (contentMediaType.equalsIgnoreCase(MediaType.APPLICATION_OCTET_STREAM_VALUE)) {
-                File file = FileUtils.GET_OUTPUT_FILE(t.getId());
-                if (resultTask != null)
-                    ResultTaskUtils.export(file, resultTask);
-                if (file.exists()) {
-                    return ResponseEntity.ok()
-                            .header("Content-Disposition", "attachment; filename=" + file.getName())
-                            .contentLength(file.length())
-                            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                            .body(new FileSystemResource(file));
+            if (t.getStatus() == EurekaTask.Status.Done) {
+                Optional<ResultWrapper> r = resultWrapperRepository.findByTaskIdFilter(id);
+                if (r.isPresent()) {
+                    resultTask = r.get().getResult();
+                    String contentMediaType = request.getHeader("accept");
+                    logger.error("Accept {}", contentMediaType);
+                    if (contentMediaType.equalsIgnoreCase(MediaType.APPLICATION_OCTET_STREAM_VALUE) || contentMediaType.contains("*/*")) {
+                        File file = FileUtils.GET_OUTPUT_FILE(t.getId());
+                        if (resultTask != null)
+                            ResultTaskUtils.export(file, resultTask);
+                        if (file.exists()) {
+                            return ResponseEntity.ok()
+                                    .header("Content-Disposition", "attachment; filename=" + file.getName())
+                                    .contentLength(file.length())
+                                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                                    .body(new FileSystemResource(file));
+                        }
+                    } else if (contentMediaType.equalsIgnoreCase(MediaType.APPLICATION_JSON_VALUE)) {
+                        if (resultTask != null)
+                            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(resultTask);
+                    } else {
+                        return ResponseEntity.badRequest().body("Unsupported content-type");
+                    }
                 }
-            } else if (contentMediaType.equalsIgnoreCase(MediaType.APPLICATION_JSON_VALUE)) {
-                if (resultTask != null)
-                    return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(resultTask);
-                else
-                    return ResponseEntity.noContent().build();
-            } else {
-                return ResponseEntity.badRequest().body("Unsupported content-type");
             }
+            logger.error("Result task ? {}", resultTask);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.badRequest().build();

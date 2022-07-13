@@ -1,4 +1,4 @@
-package com.castellanos94.fuzzylogic.api.db;
+package com.castellanos94.fuzzylogic.api.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
