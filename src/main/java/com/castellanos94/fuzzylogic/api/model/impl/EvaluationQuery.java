@@ -1,17 +1,12 @@
 package com.castellanos94.fuzzylogic.api.model.impl;
 
-import com.castellanos94.fuzzylogic.api.model.Logic;
-import com.castellanos94.fuzzylogic.api.model.Query;
-import com.castellanos94.fuzzylogicgp.core.StateNode;
-import com.castellanos94.fuzzylogicgp.core.TaskType;
-import com.castellanos94.fuzzylogicgp.parser.ParserPredicate;
+import java.util.ArrayList;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Set;
+import com.castellanos94.fuzzylogic.api.model.Query;
+import com.castellanos94.fuzzylogicgp.core.TaskType;
+import com.castellanos94.fuzzylogicgp.parser.ParserPredicate;
 @Document(collection = "queries")
 public class EvaluationQuery extends Query {
     public EvaluationQuery() {
