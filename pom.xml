@@ -69,7 +69,7 @@
         <dependency>
             <groupId>com.castellanos94</groupId>
             <artifactId>fuzzylogicgp-algorithm</artifactId>
-            <version>1.5.2</version>
+            <version>1.6.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt -->
         <dependency>
