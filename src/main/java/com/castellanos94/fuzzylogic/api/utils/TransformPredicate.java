@@ -72,7 +72,7 @@ public class TransformPredicate {
     private static Generator transformGenerator(GeneratorNode generatorNode) {
         Generator generator = new Generator();
         generator.setLabel(generatorNode.getLabel());
-        generator.setDepth(generator.getDepth());
+        generator.setDepth(generatorNode.getDepth());
         generator.setFrom(generatorNode.getByGenerator());
         generator.setEditable(generatorNode.isEditable());
         generator.setDescription(generatorNode.getDescription());

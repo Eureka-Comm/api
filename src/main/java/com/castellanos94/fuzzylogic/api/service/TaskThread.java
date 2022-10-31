@@ -89,14 +89,14 @@ public class TaskThread implements Runnable {
                         .setExponent(task.getQuery().getLogic().getExponent())
                         .setImplicationType(ImplicationType.searchEnum(task.getQuery().getLogic().getImplicationType().name()))
                         .create();
+                LOGGER.info("Original predicate {}",predicateTree);
+                LOGGER.info("Predicate to work {}",_operator);
                 if (_logic == null) {
                     LOGGER.error("Error al transformar la logica");
                     task.setMsg("Error convert predicate:");
                     task.setStatus(EurekaTask.Status.Failed);
                 } else {
                     if (task.getQuery() instanceof EvaluationQuery && !(task.getQuery() instanceof DiscoveryQuery)) {
-
-                        //task.getQuery().getLogic().toInternalObject().build();
                         LOGGER.error("Logic {}", _logic);
 
                         try {
