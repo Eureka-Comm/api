@@ -1,14 +1,24 @@
 package com.castellanos94.fuzzylogic.api.service;
 
-import com.castellanos94.fuzzylogic.api.db.*;
+import com.castellanos94.fuzzylogic.api.db.EurekaTask;
+import com.castellanos94.fuzzylogic.api.db.EurekaTaskRepository;
+import com.castellanos94.fuzzylogic.api.db.ResultWrapper;
+import com.castellanos94.fuzzylogic.api.db.ResultWrapperRepository;
 import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
 import com.castellanos94.fuzzylogic.api.model.impl.EvaluationQuery;
 import com.castellanos94.fuzzylogic.api.utils.FileUtils;
-import com.castellanos94.fuzzylogicgp.algorithm.EvaluatePredicate;
-import com.castellanos94.fuzzylogicgp.algorithm.KDFLC;
+import com.castellanos94.fuzzylogic.api.utils.TransformPredicate;
 import com.castellanos94.fuzzylogicgp.core.DiscoveryResult;
 import com.castellanos94.fuzzylogicgp.core.EvaluationResult;
 import com.castellanos94.fuzzylogicgp.core.NodeTree;
+import com.castellanos94.fuzzylogicgp.core.OperatorException;
+import com.castellanos94.jfuzzylogic.algorithm.impl.DiscoveryAlgorithm;
+import com.castellanos94.jfuzzylogic.algorithm.impl.EvaluationAlgorithm;
+import com.castellanos94.jfuzzylogic.core.OperatorUtil;
+import com.castellanos94.jfuzzylogic.core.base.Operator;
+import com.castellanos94.jfuzzylogic.core.logic.ImplicationType;
+import com.castellanos94.jfuzzylogic.core.logic.LogicType;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Component
 @Scope("prototype")
@@ -36,7 +47,6 @@ public class TaskThread implements Runnable {
         this.task = task;
     }
 
-    private KDFLC algorithm;
 
     @Override
     public void run() {
@@ -51,7 +61,7 @@ public class TaskThread implements Runnable {
             task.setStatus(EurekaTask.Status.Failed);
         }
         if (predicateTree != null) {
-            com.castellanos94.fuzzylogicgp.logic.Logic _logic ;
+            com.castellanos94.jfuzzylogic.core.logic.Logic _logic;
             File output;
             Table table = null;
             try {
@@ -65,52 +75,94 @@ public class TaskThread implements Runnable {
                 ResultWrapper results = new ResultWrapper();
                 results.setTaskId(task.getId());
                 results.setJob(task.getQuery().getJob());
+                Operator _operator = null;
+                try {
+                    _operator = TransformPredicate.transform(predicateTree);
+                } catch (JsonProcessingException e) {
+                    LOGGER.error("Error al transformar el predicado", e);
+                    task.setMsg("Error convert predicate:" + e.getMessage());
+                    task.setStatus(EurekaTask.Status.Failed);
+                }
+                _logic = com.castellanos94.jfuzzylogic.core.logic.impl.LogicBuilder
+                        .newBuilder(LogicType.valueOf(task.getQuery().getLogic().getType().name().toUpperCase()))
+                        .setExponent(task.getQuery().getLogic().getExponent())
+                        .setImplicationType(ImplicationType.searchEnum(task.getQuery().getLogic().getImplicationType().name()))
+                        .create();
+                if (_logic == null) {
+                    LOGGER.error("Error al transformar la logica");
+                    task.setMsg("Error convert predicate:");
+                    task.setStatus(EurekaTask.Status.Failed);
+                } else {
+                    if (task.getQuery() instanceof EvaluationQuery && !(task.getQuery() instanceof DiscoveryQuery)) {
 
-                if (task.getQuery() instanceof EvaluationQuery && !(task.getQuery() instanceof DiscoveryQuery)) {
-                    _logic = task.getQuery().getLogic().toInternalObject().build();
-                    LOGGER.error("Logic {}", _logic);
-                    try {
-                        EvaluatePredicate evaluatePredicate = new EvaluatePredicate(_logic, table);
-                        evaluatePredicate.evaluate(predicateTree);
-                        ArrayList<NodeTree> operators = NodeTree.getNodesByType(predicateTree, NodeTree.class);
-                        EvaluationResult evaluationResult = (EvaluationResult) evaluatePredicate.getResult();
-                        for (NodeTree op : operators) {
-                            EvaluatePredicate evaluatePredicate2 = new EvaluatePredicate(_logic, table);
-                            op.setFitness(evaluatePredicate2.evaluate(op.copy()));
-                        }
-                        evaluationResult.setPredicate(predicateTree.toJson());
-
-                        results.setResult(evaluationResult);
-                        resultRepository.save(results);
-
-                        task.setMsg("Done " + new Date());
-                        task.setStatus(EurekaTask.Status.Done);
-                    } catch (Exception e) {
-                        LOGGER.error("Evaluation algorithm (or saving dataset)", e);
-                        task.setMsg("Failed " + new Date() + " " + e.getMessage());
-                        task.setStatus(EurekaTask.Status.Failed);
-                    }
-                } else if (task.getQuery() instanceof DiscoveryQuery) {
-                    try {
-                        DiscoveryQuery discoveryQuery = (DiscoveryQuery) task.getQuery();
-                        _logic = discoveryQuery.getLogic().toInternalObject().build();
+                        //task.getQuery().getLogic().toInternalObject().build();
                         LOGGER.error("Logic {}", _logic);
-                        algorithm = new KDFLC(_logic, discoveryQuery.getPopulationSize(), discoveryQuery.getNumberOfIterations(),
-                                discoveryQuery.getNumberOfResults(), discoveryQuery.getMinimumTruthValue(), discoveryQuery.getMutationRate(),
-                                discoveryQuery.getAdjPopulationSize(), discoveryQuery.getAdjNumberOfIterations(), discoveryQuery.getAdjMinimumTruthValue(), table, discoveryQuery.getMaxTime());
 
-                        algorithm.execute(predicateTree);
-                        DiscoveryResult discoveryResult = (DiscoveryResult) algorithm.getResult();
+                        try {
+                            EvaluationAlgorithm evaluatePredicate = new EvaluationAlgorithm(_operator, _logic, table);
+                            evaluatePredicate.execute();
+                            ArrayList<NodeTree> operators = NodeTree.getNodesByType(predicateTree, NodeTree.class);
+                            com.castellanos94.jfuzzylogic.core.base.impl.EvaluationResult rs = evaluatePredicate.getResult();
 
-                        results.setResult(discoveryResult);
-                        resultRepository.save(results);
+                            EvaluationResult evaluationResult = new EvaluationResult(rs.getForAll(), rs.getExists(), rs.getData().remove("result"), rs.getData());
 
-                        task.setMsg("Done " + new Date());
-                        task.setStatus(EurekaTask.Status.Done);
-                    } catch (Exception e) {
-                        LOGGER.error("Discovery algorithm", e);
-                        task.setMsg("Failed " + new Date() + " " + e.getMessage());
-                        task.setStatus(EurekaTask.Status.Failed);
+                            for (Operator op : OperatorUtil.getNodesByClass(_operator, Operator.class)) {
+                                EvaluationAlgorithm _evaluatePredicate = new EvaluationAlgorithm(op, _logic, table);
+
+                                _evaluatePredicate.execute();
+
+                            }
+                            evaluationResult.setPredicate(TransformPredicate.convertToOldVersion(rs.getPredicate()).toJson());
+
+
+                            results.setResult(evaluationResult);
+                            resultRepository.save(results);
+
+                            task.setMsg("Done " + new Date());
+                            task.setStatus(EurekaTask.Status.Done);
+                        } catch (Exception e) {
+                            LOGGER.error("Evaluation algorithm (or saving dataset)", e);
+                            task.setMsg("Failed " + new Date() + " " + e.getMessage());
+                            task.setStatus(EurekaTask.Status.Failed);
+                        }
+                    } else if (task.getQuery() instanceof DiscoveryQuery) {
+                        try {
+                            DiscoveryQuery discoveryQuery = (DiscoveryQuery) task.getQuery();
+                            LOGGER.error("Logic {}", _logic);
+                            /**
+                             * Operator predicate, Long maximumTime, Logic logic, Table table, Double minTruthValue,
+                             *             Double crossoverRate,
+                             *             Double mutationRate,
+                             *             Integer maximumNumberResult, Integer populationSize, Double adjMinTruthValue, Double adjCrossoverRate,
+                             *             Double adjMutationRate, Integer adjPopulationSize, Integer adjMaxIteration
+                             */
+                            DiscoveryAlgorithm discoveryAlgorithm = new DiscoveryAlgorithm(_operator, discoveryQuery.getMaxTime(), _logic, table,
+                                    (double) discoveryQuery.getMinimumTruthValue(), 0.95, (double) discoveryQuery.getMutationRate(),
+                                    discoveryQuery.getNumberOfResults(), discoveryQuery.getPopulationSize(), (double) discoveryQuery.getAdjMinimumTruthValue(), 0.95,
+                                    0.1, discoveryQuery.getAdjPopulationSize(), discoveryQuery.getAdjNumberOfIterations());
+                            discoveryAlgorithm.execute();
+                            List<DiscoveryResult.Record> values = new ArrayList<>();
+
+                            discoveryAlgorithm.getResult().getData().forEach(row -> {
+                                NodeTree tree = null;
+                                try {
+                                    tree = TransformPredicate.convertToOldVersion(row);
+                                    values.add(new DiscoveryResult.Record(tree.getFitness(), tree.toString(), tree.toJson()));
+                                } catch (OperatorException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
+                            DiscoveryResult discoveryResult = new DiscoveryResult(values);
+                            results.setResult(discoveryResult);
+                            resultRepository.save(results);
+
+                            task.setMsg("Done " + new Date());
+                            task.setStatus(EurekaTask.Status.Done);
+                        } catch (Exception e) {
+                            LOGGER.error("Discovery algorithm", e);
+                            task.setMsg("Failed " + new Date() + " " + e.getMessage());
+                            task.setStatus(EurekaTask.Status.Failed);
+                        }
                     }
                 }
             }
@@ -135,12 +187,6 @@ public class TaskThread implements Runnable {
         // Posible escenario: que se detenga sin guardar estado Status.Stopped Status.Running
         // Guardar estado Status.Pause ? -> Status.Running
         // Solo guardar los resultados y exportar Status.Done -> Terminal
-    }
-
-    public ArrayList<String> getLog() {
-        if (algorithm != null)
-            return algorithm.getLogList();
-        return null;
     }
 }
 

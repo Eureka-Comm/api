@@ -6,6 +6,7 @@ import com.castellanos94.fuzzylogicgp.core.TaskType;
 import com.castellanos94.fuzzylogicgp.parser.ParserPredicate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import org.hibernate.validator.constraints.Range;
 import org.springframework.data.mongodb.core.mapping.Document;
 

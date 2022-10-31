@@ -1,6 +1,9 @@
 package com.castellanos94.fuzzylogic.api.controller;
 
-import com.castellanos94.fuzzylogic.api.db.*;
+import com.castellanos94.fuzzylogic.api.db.EurekaTask;
+import com.castellanos94.fuzzylogic.api.db.EurekaTaskRepository;
+import com.castellanos94.fuzzylogic.api.db.ResultWrapper;
+import com.castellanos94.fuzzylogic.api.db.ResultWrapperRepository;
 import com.castellanos94.fuzzylogic.api.model.Query;
 import com.castellanos94.fuzzylogic.api.model.ResponseModel;
 import com.castellanos94.fuzzylogic.api.model.impl.DiscoveryQuery;
@@ -37,7 +40,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -72,10 +77,6 @@ public class QueryController {
         if (optionalEurekaTask.isPresent()) {
             EurekaTask task = optionalEurekaTask.get();
             ResponseModel model = new ResponseModel().setStatus(task.getStatus()).setMsg(task.getMsg()).setId(task.getId());
-            if (task.getQuery() instanceof DiscoveryQuery && task.getStatus() == EurekaTask.Status.Running) {
-                logger.error("entro aqui");
-                model.setLog(service.getLog(task));
-            }
             return ResponseEntity.ok(model);
         }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

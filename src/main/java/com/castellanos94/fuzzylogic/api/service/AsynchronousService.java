@@ -49,14 +49,4 @@ public class AsynchronousService {
         }
     }
 
-    public ArrayList<String> getLog(EurekaTask task) {
-        for (TaskThread t : activeTasks) {
-            if (t.getTask().getId().equals(task.getId())) {
-                return t.getLog();
-            }
-        }
-        return null;
-    }
-
-
 }
