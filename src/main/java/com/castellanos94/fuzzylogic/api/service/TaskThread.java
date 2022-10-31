@@ -29,6 +29,7 @@ import tech.tablesaw.api.Table;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -68,7 +69,7 @@ public class TaskThread implements Runnable {
                 table = FileUtils.LOAD_DATASET(task.getId());
             } catch (IOException e) {
                 LOGGER.error("Error al leer el dataset", e);
-                task.setMsg("Error reading dataset:" + e.getMessage());
+                task.setMsg("Error reading dataset:" +  e.toString());
                 task.setStatus(EurekaTask.Status.Failed);
             }
             if (table != null) {
@@ -104,7 +105,7 @@ public class TaskThread implements Runnable {
                             ArrayList<NodeTree> operators = NodeTree.getNodesByType(predicateTree, NodeTree.class);
                             com.castellanos94.jfuzzylogic.core.base.impl.EvaluationResult rs = evaluatePredicate.getResult();
 
-                            EvaluationResult evaluationResult = new EvaluationResult(rs.getForAll(), rs.getExists(), rs.getData().remove("result"), rs.getData());
+                            EvaluationResult evaluationResult = new EvaluationResult(rs.getForAll(), rs.getExists(), rs.getData().remove("result"), Collections.emptyMap());
 
                             for (Operator op : OperatorUtil.getNodesByClass(_operator, Operator.class)) {
                                 EvaluationAlgorithm _evaluatePredicate = new EvaluationAlgorithm(op, _logic, table);
@@ -122,20 +123,13 @@ public class TaskThread implements Runnable {
                             task.setStatus(EurekaTask.Status.Done);
                         } catch (Exception e) {
                             LOGGER.error("Evaluation algorithm (or saving dataset)", e);
-                            task.setMsg("Failed " + new Date() + " " + e.getMessage());
+                            task.setMsg("Failed " + new Date() + " " + e.toString());
                             task.setStatus(EurekaTask.Status.Failed);
                         }
                     } else if (task.getQuery() instanceof DiscoveryQuery) {
                         try {
                             DiscoveryQuery discoveryQuery = (DiscoveryQuery) task.getQuery();
                             LOGGER.error("Logic {}", _logic);
-                            /**
-                             * Operator predicate, Long maximumTime, Logic logic, Table table, Double minTruthValue,
-                             *             Double crossoverRate,
-                             *             Double mutationRate,
-                             *             Integer maximumNumberResult, Integer populationSize, Double adjMinTruthValue, Double adjCrossoverRate,
-                             *             Double adjMutationRate, Integer adjPopulationSize, Integer adjMaxIteration
-                             */
                             DiscoveryAlgorithm discoveryAlgorithm = new DiscoveryAlgorithm(_operator, discoveryQuery.getMaxTime(), _logic, table,
                                     (double) discoveryQuery.getMinimumTruthValue(), 0.95, (double) discoveryQuery.getMutationRate(),
                                     discoveryQuery.getNumberOfResults(), discoveryQuery.getPopulationSize(), (double) discoveryQuery.getAdjMinimumTruthValue(), 0.95,
@@ -149,7 +143,9 @@ public class TaskThread implements Runnable {
                                     tree = TransformPredicate.convertToOldVersion(row);
                                     values.add(new DiscoveryResult.Record(tree.getFitness(), tree.toString(), tree.toJson()));
                                 } catch (OperatorException e) {
-                                    throw new RuntimeException(e);
+                                    LOGGER.error("Discovery algorithm export convert", e);
+                                    task.setMsg("Failed " + new Date() + " " +  e.toString());
+                                    task.setStatus(EurekaTask.Status.Failed);
                                 }
                             });
                             DiscoveryResult discoveryResult = new DiscoveryResult(values);
@@ -160,7 +156,7 @@ public class TaskThread implements Runnable {
                             task.setStatus(EurekaTask.Status.Done);
                         } catch (Exception e) {
                             LOGGER.error("Discovery algorithm", e);
-                            task.setMsg("Failed " + new Date() + " " + e.getMessage());
+                            task.setMsg("Failed " + new Date() + " " +  e.toString());
                             task.setStatus(EurekaTask.Status.Failed);
                         }
                     }
