@@ -30,7 +30,7 @@ public class TransformPredicate {
         logger.debug("Input {}", input);
         if (input == null)
             return null;
-        if (input.getChildren().get(0) instanceof GeneratorNode) {
+        if (input.getChildren().size() == 1 && input.getChildren().get(0) instanceof GeneratorNode) {
             return transformGenerator((GeneratorNode) input.getChildren().get(0));
         }
         Operator predicate = OperatorUtil.getInstance(OperatorType.valueOf(input.getType().name()));

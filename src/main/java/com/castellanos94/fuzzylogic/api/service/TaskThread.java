@@ -28,6 +28,8 @@ import tech.tablesaw.api.Table;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -58,7 +60,9 @@ public class TaskThread implements Runnable {
             predicateTree = task.getQuery().getPredicateTree();
         } catch (Exception e) {
             LOGGER.error("Convert predicate", e);
-            task.setMsg("Error:" + e.getMessage());
+            StringWriter writer = new StringWriter();
+            e.printStackTrace(new PrintWriter(writer));
+            task.setMsg("Error:" + writer.toString());
             task.setStatus(EurekaTask.Status.Failed);
         }
         if (predicateTree != null) {
@@ -69,7 +73,9 @@ public class TaskThread implements Runnable {
                 table = FileUtils.LOAD_DATASET(task.getId());
             } catch (IOException e) {
                 LOGGER.error("Error al leer el dataset", e);
-                task.setMsg("Error reading dataset:" +  e.toString());
+                StringWriter writer = new StringWriter();
+                e.printStackTrace(new PrintWriter(writer));
+                task.setMsg("Error reading dataset:" + writer.toString());
                 task.setStatus(EurekaTask.Status.Failed);
             }
             if (table != null) {
@@ -81,7 +87,9 @@ public class TaskThread implements Runnable {
                     _operator = TransformPredicate.transform(predicateTree);
                 } catch (JsonProcessingException e) {
                     LOGGER.error("Error al transformar el predicado", e);
-                    task.setMsg("Error convert predicate:" + e.getMessage());
+                    StringWriter writer = new StringWriter();
+                    e.printStackTrace(new PrintWriter(writer));
+                    task.setMsg("Error convert predicate:" + writer.toString());
                     task.setStatus(EurekaTask.Status.Failed);
                 }
                 _logic = com.castellanos94.jfuzzylogic.core.logic.impl.LogicBuilder
@@ -89,11 +97,11 @@ public class TaskThread implements Runnable {
                         .setExponent(task.getQuery().getLogic().getExponent())
                         .setImplicationType(ImplicationType.searchEnum(task.getQuery().getLogic().getImplicationType().name()))
                         .create();
-                LOGGER.info("Original predicate {}",predicateTree);
-                LOGGER.info("Predicate to work {}",_operator);
+                LOGGER.info("Original predicate {}", predicateTree);
+                LOGGER.info("Predicate to work {}", _operator);
                 if (_logic == null) {
                     LOGGER.error("Error al transformar la logica");
-                    task.setMsg("Error convert predicate:");
+                    task.setMsg("Error convert predicate: logic");
                     task.setStatus(EurekaTask.Status.Failed);
                 } else {
                     if (task.getQuery() instanceof EvaluationQuery && !(task.getQuery() instanceof DiscoveryQuery)) {
@@ -123,7 +131,9 @@ public class TaskThread implements Runnable {
                             task.setStatus(EurekaTask.Status.Done);
                         } catch (Exception e) {
                             LOGGER.error("Evaluation algorithm (or saving dataset)", e);
-                            task.setMsg("Failed " + new Date() + " " + e.toString());
+                            StringWriter writer = new StringWriter();
+                            e.printStackTrace(new PrintWriter(writer));
+                            task.setMsg("Failed " + new Date() + " " + writer.toString());
                             task.setStatus(EurekaTask.Status.Failed);
                         }
                     } else if (task.getQuery() instanceof DiscoveryQuery) {
@@ -144,7 +154,9 @@ public class TaskThread implements Runnable {
                                     values.add(new DiscoveryResult.Record(tree.getFitness(), tree.toString(), tree.toJson()));
                                 } catch (OperatorException e) {
                                     LOGGER.error("Discovery algorithm export convert", e);
-                                    task.setMsg("Failed " + new Date() + " " +  e.toString());
+                                    StringWriter writer = new StringWriter();
+                                    e.printStackTrace(new PrintWriter(writer));
+                                    task.setMsg("Failed " + new Date() + " " + writer.toString());
                                     task.setStatus(EurekaTask.Status.Failed);
                                 }
                             });
@@ -156,7 +168,9 @@ public class TaskThread implements Runnable {
                             task.setStatus(EurekaTask.Status.Done);
                         } catch (Exception e) {
                             LOGGER.error("Discovery algorithm", e);
-                            task.setMsg("Failed " + new Date() + " " +  e.toString());
+                            StringWriter writer = new StringWriter();
+                            e.printStackTrace(new PrintWriter(writer));
+                            task.setMsg("Failed " + new Date() + " " + writer.toString());
                             task.setStatus(EurekaTask.Status.Failed);
                         }
                     }
