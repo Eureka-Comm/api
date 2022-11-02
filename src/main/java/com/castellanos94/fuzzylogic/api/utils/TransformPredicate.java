@@ -152,6 +152,48 @@ public class TransformPredicate {
         if (f instanceof FPG) {
             return MembershipFunctionType.FPG;
         }
+        if (f instanceof Sigmoid) {
+            return MembershipFunctionType.SIGMOID;
+        }
+        if (f instanceof NSigmoid) {
+            return MembershipFunctionType.NSIGMOID;
+        }
+        if (f instanceof Gamma) {
+            return MembershipFunctionType.GAMMA;
+        }
+        if (f instanceof Gaussian) {
+            return MembershipFunctionType.GAUSSIAN;
+        }
+        if (f instanceof GBell) {
+            return MembershipFunctionType.GBELL;
+        }
+        if (f instanceof LGamma) {
+            return MembershipFunctionType.LGAMMA;
+        }
+        if (f instanceof LTrapezoidal) {
+            return MembershipFunctionType.LTRAPEZOIDAL;
+        }
+        if (f instanceof RTrapezoidal) {
+            return MembershipFunctionType.RTRAPEZOIDAL;
+        }
+        if (f instanceof SForm) {
+            return MembershipFunctionType.SFORM;
+        }
+        if (f instanceof PseudoExp) {
+            return MembershipFunctionType.PSEUDOEXP;
+        }
+        if (f instanceof Singleton) {
+            return MembershipFunctionType.SINGLETON;
+        }
+        if (f instanceof Triangular) {
+            return MembershipFunctionType.TRIANGULAR;
+        }
+        if (f instanceof Trapezoidal) {
+            return MembershipFunctionType.TRAPEZOIDAL;
+        }
+        if (f instanceof ZForm) {
+            return MembershipFunctionType.ZFORM;
+        }
         return null;
     }
 
