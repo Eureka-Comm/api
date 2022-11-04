@@ -31,10 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Component
 @Scope("prototype")
@@ -169,7 +166,8 @@ public class TaskThread implements Runnable {
                                 }
                             });
                             if (flag) {
-                                values.sort(Collections.reverseOrder());
+                                values.sort(Comparator.comparingDouble(DiscoveryResult.Record::getFitness)
+                                        .reversed());
                             }
                             DiscoveryResult discoveryResult = new DiscoveryResult(values);
                             results.setResult(discoveryResult);
