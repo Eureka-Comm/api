@@ -151,6 +151,7 @@ public class TaskThread implements Runnable {
                                 if (flag) {
                                     double before = row.getFitness();
                                     EvaluationAlgorithm evaluationAlgorithm = new EvaluationAlgorithm(row, _logic, finalTable);
+                                    evaluationAlgorithm.execute();
                                     LOGGER.error("Evaluation for discovery implication {} - {}", before, row.getFitness());
                                 }
                                 NodeTree tree = null;
