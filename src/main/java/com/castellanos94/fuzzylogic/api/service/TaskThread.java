@@ -16,6 +16,7 @@ import com.castellanos94.jfuzzylogic.algorithm.impl.DiscoveryAlgorithm;
 import com.castellanos94.jfuzzylogic.algorithm.impl.EvaluationAlgorithm;
 import com.castellanos94.jfuzzylogic.core.OperatorUtil;
 import com.castellanos94.jfuzzylogic.core.base.Operator;
+import com.castellanos94.jfuzzylogic.core.base.impl.Imp;
 import com.castellanos94.jfuzzylogic.core.logic.ImplicationType;
 import com.castellanos94.jfuzzylogic.core.logic.LogicType;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -147,7 +148,14 @@ public class TaskThread implements Runnable {
                             discoveryAlgorithm.execute();
                             List<DiscoveryResult.Record> values = new ArrayList<>();
 
+                            boolean flag = _operator instanceof Imp;
+                            Table finalTable = table;
                             discoveryAlgorithm.getResult().getData().forEach(row -> {
+                                if (flag) {
+                                    double before = row.getFitness();
+                                    EvaluationAlgorithm evaluationAlgorithm = new EvaluationAlgorithm(row, _logic, finalTable);
+                                    LOGGER.debug("Evaluation for discovery implication {} - {}", before, row.getFitness());
+                                }
                                 NodeTree tree = null;
                                 try {
                                     tree = TransformPredicate.convertToOldVersion(row);
@@ -160,6 +168,9 @@ public class TaskThread implements Runnable {
                                     task.setStatus(EurekaTask.Status.Failed);
                                 }
                             });
+                            if (flag) {
+                                values.sort(Collections.reverseOrder());
+                            }
                             DiscoveryResult discoveryResult = new DiscoveryResult(values);
                             results.setResult(discoveryResult);
                             resultRepository.save(results);
