@@ -194,6 +194,9 @@ public class TransformPredicate {
         if (f instanceof ZForm) {
             return MembershipFunctionType.ZFORM;
         }
+        if(f instanceof MapNominal){
+            return MembershipFunctionType.MAPNOMIAL;
+        }
         return null;
     }
 
@@ -224,6 +227,8 @@ public class TransformPredicate {
         public com.castellanos94.jfuzzylogic.core.membershipfunction.MembershipFunction deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             String str = jsonElement.getAsJsonObject().get("type").getAsString().toLowerCase();
             switch (str) {
+                case "map-nominal":
+                    return jsonDeserializationContext.deserialize(jsonElement, MapNominal.class);
                 case "fpg":
                     return jsonDeserializationContext.deserialize(jsonElement, FPG.class);
                 case "sigmoid":
@@ -256,7 +261,6 @@ public class TransformPredicate {
                     return jsonDeserializationContext.deserialize(jsonElement, Gaussian.class);
                 default:
                     return null;
-
             }
         }
     }
