@@ -135,7 +135,15 @@ public class TransformPredicate {
             StateNode st = new StateNode();
             st.setColName(((State) element).getColName());
             st.setLabel(element.getLabel());
-            st.setMembershipFunction(MembershipFunctionFactory.fromArray(getMembershipFunctionTypeByRef(((State) element).getMembershipFunction()), ((State) element).getMembershipFunction().toArray()));
+            if (((State) element).getMembershipFunction() instanceof MapNominal) {
+                MapNominal f = (MapNominal) ((State) element).getMembershipFunction();
+                com.castellanos94.fuzzylogicgp.membershipfunction.MapNominal mn = new com.castellanos94.fuzzylogicgp.membershipfunction.MapNominal();
+                mn.setNotFoundValue(f.getNotFoundValue());
+                mn.setValues(f.getValues());
+                st.setMembershipFunction(mn);
+            } else {
+                st.setMembershipFunction(MembershipFunctionFactory.fromArray(getMembershipFunctionTypeByRef(((State) element).getMembershipFunction()), ((State) element).getMembershipFunction().toArray()));
+            }
             st.setDescription(element.getDescription());
             st.setEditable(element.isEditable());
             st.setByGenerator(element.getFrom());
@@ -194,7 +202,7 @@ public class TransformPredicate {
         if (f instanceof ZForm) {
             return MembershipFunctionType.ZFORM;
         }
-        if(f instanceof MapNominal){
+        if (f instanceof MapNominal) {
             return MembershipFunctionType.MAPNOMIAL;
         }
         return null;
