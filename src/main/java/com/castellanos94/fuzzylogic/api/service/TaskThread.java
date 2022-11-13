@@ -18,6 +18,7 @@ import com.castellanos94.jfuzzylogic.core.OperatorUtil;
 import com.castellanos94.jfuzzylogic.core.base.Operator;
 import com.castellanos94.jfuzzylogic.core.logic.ImplicationType;
 import com.castellanos94.jfuzzylogic.core.logic.LogicType;
+import com.castellanos94.jfuzzylogic.core.logic.impl.GMBCFA;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +114,7 @@ public class TaskThread implements Runnable {
                             ArrayList<NodeTree> operators = NodeTree.getNodesByType(predicateTree, NodeTree.class);
                             com.castellanos94.jfuzzylogic.core.base.impl.EvaluationResult rs = evaluatePredicate.getResult();
 
-                            EvaluationResult evaluationResult = new EvaluationResult(rs.getForAll(), rs.getExists(), rs.getData().remove("result"), Collections.emptyMap());
+                            EvaluationResult evaluationResult = new EvaluationResult(rs.getForAll(), rs.getExists(), rs.getData().remove("result"), _logic instanceof GMBCFA ? rs.getData():Collections.emptyMap());
 
                             for (Operator op : OperatorUtil.getNodesByClass(_operator, Operator.class)) {
                                 EvaluationAlgorithm _evaluatePredicate = new EvaluationAlgorithm(op, _logic, table);
