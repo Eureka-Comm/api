@@ -70,9 +70,9 @@
         <dependency>
             <groupId>com.castellanos94</groupId>
             <artifactId>fuzzylogicgp-algorithm</artifactId>
-            <version>1.6.0</version>
+            <version>1.6.1</version>
         </dependency>
-        <!-- New Core -->
+        <!-- New Core https://github.com/castellanos94/jfuzzy-logic-core.git --> 
         <dependency>
             <groupId>com.castellanos94</groupId>
             <artifactId>jfuzzy-logic-algorithm</artifactId>
